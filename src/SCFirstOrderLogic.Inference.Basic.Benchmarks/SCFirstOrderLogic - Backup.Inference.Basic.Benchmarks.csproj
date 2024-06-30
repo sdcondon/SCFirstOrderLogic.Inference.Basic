@@ -3,7 +3,7 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>net6.0</TargetFramework>
-    <AssemblyName>SCFirstOrderLogic.Inference.Basic.Benchmarks</AssemblyName>
+    <AssemblyName>SCFirstOrderLogic.Benchmarks</AssemblyName>
     <RootNamespace>SCFirstOrderLogic.Inference.Basic</RootNamespace>
     <Nullable>enable</Nullable>
   </PropertyGroup>

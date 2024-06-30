@@ -3,8 +3,8 @@
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
     <IsPackable>false</IsPackable>
-    <RootNamespace>SCFirstOrderLogic</RootNamespace>
-    <AssemblyName>SCFirstOrderLogic.Tests</AssemblyName>
+    <RootNamespace>SCFirstOrderLogic.Inference.Basic</RootNamespace>
+    <AssemblyName>SCFirstOrderLogic.Inference.Basic.Tests</AssemblyName>
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
