@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net6.0</TargetFramework>
+    <AssemblyName>SCFirstOrderLogic.Benchmarks</AssemblyName>
+    <RootNamespace>SCFirstOrderLogic</RootNamespace>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="BenchmarkDotNet" Version="0.13.12" />
+    <PackageReference Include="FluentAssertions" Version="6.12.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\SCFirstOrderLogic.ExampleDomains\SCFirstOrderLogic.ExampleDomains.csproj" />
+    <ProjectReference Include="..\SCFirstOrderLogic.Inference.Basic.Alternatives\SCFirstOrderLogic.Inference.Basic.Alternatives.csproj" />
+    <ProjectReference Include="..\SCFirstOrderLogic.Inference.Basic\SCFirstOrderLogic.Inference.Basic.csproj" />
+  </ItemGroup>
+
+</Project>

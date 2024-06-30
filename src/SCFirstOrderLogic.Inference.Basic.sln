@@ -1,0 +1,67 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.10.35013.160
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Repo Items", "Repo Items", "{FD3C6C06-D9CF-4EA8-BC84-F4D18FB5D880}"
+	ProjectSection(SolutionItems) = preProject
+		..\.gitignore = ..\.gitignore
+		..\LICENSE.txt = ..\LICENSE.txt
+		..\.github\workflows\PublishNuGetPackages.yml = ..\.github\workflows\PublishNuGetPackages.yml
+		..\README.md = ..\README.md
+		..\.github\workflows\ValidationBuild.yml = ..\.github\workflows\ValidationBuild.yml
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{0BA4E4A8-9AC7-4547-93C0-B0B9AB1C069C}"
+	ProjectSection(SolutionItems) = preProject
+		.editorconfig = .editorconfig
+		Directory.Build.props = Directory.Build.props
+		Directory.Build.targets = Directory.Build.targets
+		SCFirstOrderLogic-128.png = SCFirstOrderLogic-128.png
+		SCFirstOrderLogic-32.png = SCFirstOrderLogic-32.png
+	EndProjectSection
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SCFirstOrderLogic.Inference.Basic", "SCFirstOrderLogic.Inference.Basic\SCFirstOrderLogic.Inference.Basic.csproj", "{01B8ED84-2925-4380-8C3F-E28C09CD859C}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SCFirstOrderLogic.Inference.Basic.Tests", "SCFirstOrderLogic.Inference.Basic.Tests\SCFirstOrderLogic.Inference.Basic.Tests.csproj", "{8EA3FC88-B82C-4EC7-8E73-E5B45E7C94A8}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SCFirstOrderLogic.Inference.Basic.Alternatives", "SCFirstOrderLogic.Inference.Basic.Alternatives\SCFirstOrderLogic.Inference.Basic.Alternatives.csproj", "{3210FB3F-8CA9-4ECB-A5D5-A3FBBDEFD5D0}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SCFirstOrderLogic.Inference.Basic.Benchmarks", "SCFirstOrderLogic.Inference.Basic.Benchmarks\SCFirstOrderLogic.Inference.Basic.Benchmarks.csproj", "{72E765E5-1688-4E63-83FD-B2685F2EA4B6}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SCFirstOrderLogic.ExampleDomains", "SCFirstOrderLogic.ExampleDomains\SCFirstOrderLogic.ExampleDomains.csproj", "{36FB0A77-DBF7-4F3E-931B-917D0B1DD5BE}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{01B8ED84-2925-4380-8C3F-E28C09CD859C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{01B8ED84-2925-4380-8C3F-E28C09CD859C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{01B8ED84-2925-4380-8C3F-E28C09CD859C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{01B8ED84-2925-4380-8C3F-E28C09CD859C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8EA3FC88-B82C-4EC7-8E73-E5B45E7C94A8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8EA3FC88-B82C-4EC7-8E73-E5B45E7C94A8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8EA3FC88-B82C-4EC7-8E73-E5B45E7C94A8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8EA3FC88-B82C-4EC7-8E73-E5B45E7C94A8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3210FB3F-8CA9-4ECB-A5D5-A3FBBDEFD5D0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3210FB3F-8CA9-4ECB-A5D5-A3FBBDEFD5D0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3210FB3F-8CA9-4ECB-A5D5-A3FBBDEFD5D0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3210FB3F-8CA9-4ECB-A5D5-A3FBBDEFD5D0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{72E765E5-1688-4E63-83FD-B2685F2EA4B6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{72E765E5-1688-4E63-83FD-B2685F2EA4B6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{72E765E5-1688-4E63-83FD-B2685F2EA4B6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{72E765E5-1688-4E63-83FD-B2685F2EA4B6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{36FB0A77-DBF7-4F3E-931B-917D0B1DD5BE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{36FB0A77-DBF7-4F3E-931B-917D0B1DD5BE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{36FB0A77-DBF7-4F3E-931B-917D0B1DD5BE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{36FB0A77-DBF7-4F3E-931B-917D0B1DD5BE}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {95A7BE88-5497-4EF9-B54E-E3AE8E0AFD91}
+	EndGlobalSection
+EndGlobal
