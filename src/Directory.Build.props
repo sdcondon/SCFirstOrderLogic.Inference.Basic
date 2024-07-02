@@ -5,10 +5,10 @@
     <Company />
     <Product>SCFirstOrderLogic</Product>
     <RepositoryType>git</RepositoryType>
-    <RepositoryUrl>https://github.com/sdcondon/SCFirstOrderLogic.git</RepositoryUrl>
+    <RepositoryUrl>https://github.com/sdcondon/SCFirstOrderLogic.Inference.Basic.git</RepositoryUrl>
     <PublishRepositoryUrl>true</PublishRepositoryUrl>
     <PackageProjectUrl>https://sdcondon.net/SCFirstOrderLogic/</PackageProjectUrl>
-    <PackageReleaseNotes>See https://github.com/sdcondon/SCFirstOrderLogic/releases.</PackageReleaseNotes>
+    <PackageReleaseNotes>See https://github.com/sdcondon/SCFirstOrderLogic.Inference.Basic/releases.</PackageReleaseNotes>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <Copyright>2021-2024 Simon Condon</Copyright>
     <IncludeSymbols>true</IncludeSymbols>
