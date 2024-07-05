@@ -7,9 +7,9 @@ namespace SCFirstOrderLogic.TestUtilities;
 /// </summary>
 internal static class GreedyKingsDomain
 {
-    public static OperableConstant John { get; } = new OperableConstant(nameof(John));
-    public static OperableConstant Richard { get; } = new OperableConstant(nameof(Richard));
-    public static OperableConstant Mary { get; } = new OperableConstant(nameof(Mary));
+    public static OperableConstant John { get; } = new Constant(nameof(John));
+    public static OperableConstant Richard { get; } = new Constant(nameof(Richard));
+    public static OperableConstant Mary { get; } = new Constant(nameof(Mary));
 
     public static OperableSentence AllGreedyAreEvil { get; } = ForAll(X, If(IsGreedy(X), IsEvil(X)));
     public static OperableSentence AllGreedyKingsAreEvil { get; } = ForAll(X, If(IsKing(X) & IsGreedy(X), IsEvil(X)));
