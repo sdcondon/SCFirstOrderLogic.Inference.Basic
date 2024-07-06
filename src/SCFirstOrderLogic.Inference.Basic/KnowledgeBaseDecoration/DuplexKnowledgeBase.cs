@@ -5,7 +5,7 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace SCFirstOrderLogic.Inference.Basic;
+namespace SCFirstOrderLogic.Inference.Basic.KnowledgeBaseDecoration;
 
 /// <summary>
 /// Decorator knowledge base class that, when answering queries, will concurrently execute the query and the negation of the query.

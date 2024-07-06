@@ -1,6 +1,5 @@
 ﻿// Copyright (c) 2021-2024 Simon Condon.
 // You may use this file in accordance with the terms of the MIT license.
-using SCFirstOrderLogic.Inference;
 using SCFirstOrderLogic.SentenceManipulation;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,7 +7,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using static SCFirstOrderLogic.SentenceCreation.SentenceFactory;
 
-namespace SCFirstOrderLogic.DecoratorKnowledgeBases;
+namespace SCFirstOrderLogic.Inference.Basic.KnowledgeBaseDecoration;
 
 /// <summary>
 /// <para>
