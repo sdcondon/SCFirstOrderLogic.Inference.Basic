@@ -1,7 +1,6 @@
 ﻿using FluentAssertions;
 using FlUnit;
 using SCFirstOrderLogic.ExampleDomains.FromAIaMA.Chapter9.UsingSentenceFactory;
-using SCFirstOrderLogic.Inference.BackwardChaining;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;

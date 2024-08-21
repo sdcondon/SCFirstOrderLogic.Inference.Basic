@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 using static SCFirstOrderLogic.ExampleDomains.FromAIaMA.Chapter8.UsingSentenceFactory.KinshipDomain;
 using static SCFirstOrderLogic.SentenceCreation.SentenceFactory;
 
-namespace SCFirstOrderLogic.Inference.Basic;
+namespace SCFirstOrderLogic.Inference.Basic.KnowledgeBaseDecoration;
 
 public static class EqualityAxiomisingKnowledgeBaseTests
 {
