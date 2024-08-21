@@ -1,8 +1,6 @@
 ﻿// Copyright (c) 2021-2024 Simon Condon.
 // You may use this file in accordance with the terms of the MIT license.
-using SCFirstOrderLogic;
-using SCFirstOrderLogic.SentenceManipulation;
-using SCFirstOrderLogic.SentenceManipulation.Unification;
+using SCFirstOrderLogic.SentenceManipulation.VariableManipulation;
 
 namespace SCFirstOrderLogic.Inference.Basic.ForwardChaining;
 

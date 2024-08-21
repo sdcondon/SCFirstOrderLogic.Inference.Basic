@@ -8,8 +8,8 @@ namespace SCFirstOrderLogic.Inference.Basic.Resolution;
 
 public static partial class ClauseResolutionTests
 {
-    private static Term C => new Constant(nameof(C));
-    private static Term D => new Constant(nameof(D));
+    private static Term C => new Function(nameof(C));
+    private static Term D => new Function(nameof(D));
     private static OperablePredicate S(Term t) => new Predicate(nameof(S), t);
     private static OperablePredicate T(Term t) => new Predicate(nameof(T), t);
     private static OperablePredicate U(Term t) => new Predicate(nameof(U), t);

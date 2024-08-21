@@ -2,8 +2,8 @@
 // You may use this file in accordance with the terms of the MIT license.
 using SCFirstOrderLogic.InternalUtilities;
 using SCFirstOrderLogic.SentenceFormatting;
-using SCFirstOrderLogic.SentenceManipulation;
-using SCFirstOrderLogic.SentenceManipulation.Unification;
+using SCFirstOrderLogic.SentenceManipulation.Normalisation;
+using SCFirstOrderLogic.SentenceManipulation.VariableManipulation;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;

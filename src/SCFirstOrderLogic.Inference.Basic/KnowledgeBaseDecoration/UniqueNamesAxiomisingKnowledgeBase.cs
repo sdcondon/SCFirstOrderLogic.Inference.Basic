@@ -60,25 +60,25 @@ public class UniqueNamesAxiomisingKnowledgeBase : IKnowledgeBase
         private readonly IKnowledgeBase innerKnowledgeBase;
 
         // NB: We only need to consider the constant (i.e. not the identifier) here
-        // because the Constant class uses the Identifier for its equality implementation.
-        private readonly HashSet<Constant> knownConstants = new();
+        // because the Function class uses the Identifier for its equality implementation.
+        private readonly HashSet<Function> knownConstants = new();
 
         public UniqueNamesAxiomiser(IKnowledgeBase innerKnowledgeBase)
         {
             this.innerKnowledgeBase = innerKnowledgeBase;
         }
 
-        public override void Visit(Constant constant)
+        public override void Visit(Function function)
         {
-            if (!knownConstants.Contains(constant))
+            if (function.Arguments.Count == 0 && !knownConstants.Contains(function))
             {
                 foreach (var knownConstant in knownConstants)
                 {
                     // TODO-PERFORMANCE: potentially long-running. Perhaps add some async visitor types?
-                    innerKnowledgeBase.TellAsync(Not(AreEqual(constant, knownConstant))).GetAwaiter().GetResult();
+                    innerKnowledgeBase.TellAsync(Not(AreEqual(function, knownConstant))).GetAwaiter().GetResult();
                 }
 
-                knownConstants.Add(constant);
+                knownConstants.Add(function);
             }
         }
     }

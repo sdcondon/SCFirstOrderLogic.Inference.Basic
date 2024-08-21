@@ -16,9 +16,9 @@ public static class UniqueNamesAxiomisingKnowledgeBaseTests
         .WhenAsync(async kb =>
         {
             var sut = new UniqueNamesAxiomisingKnowledgeBase(kb);
-            await sut.TellAsync(IsMale(new Constant("Bob")));
-            await sut.TellAsync(IsMale(new Constant("Larry")));
-            await sut.TellAsync(Not(IsMale(new Constant("Alex"))));
+            await sut.TellAsync(IsMale(new Function("Bob")));
+            await sut.TellAsync(IsMale(new Function("Larry")));
+            await sut.TellAsync(Not(IsMale(new Function("Alex"))));
         })
         .ThenReturns()
         .And(kb =>
@@ -26,12 +26,12 @@ public static class UniqueNamesAxiomisingKnowledgeBaseTests
             kb.Sentences.Should().BeEquivalentTo(
                 expectation: new Sentence[]
                 {
-                    IsMale(new Constant("Bob")), // Sentence that we told it
-                    IsMale(new Constant("Larry")), // Sentence that we told it
-                    Not(IsMale(new Constant("Alex"))), // Sentence that we told it
-                    Not(AreEqual(new Constant("Larry"), new Constant("Bob"))),
-                    Not(AreEqual(new Constant("Alex"), new Constant("Bob"))),
-                    Not(AreEqual(new Constant("Alex"), new Constant("Larry"))),
+                    IsMale(new Function("Bob")), // Sentence that we told it
+                    IsMale(new Function("Larry")), // Sentence that we told it
+                    Not(IsMale(new Function("Alex"))), // Sentence that we told it
+                    Not(AreEqual(new Function("Larry"), new Function("Bob"))),
+                    Not(AreEqual(new Function("Alex"), new Function("Bob"))),
+                    Not(AreEqual(new Function("Alex"), new Function("Larry"))),
                 },
                 config: EquivalencyOptions.UsingOnlyConsistencyForVariables);
         });

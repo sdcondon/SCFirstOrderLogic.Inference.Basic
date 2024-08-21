@@ -1,5 +1,6 @@
 ﻿using FluentAssertions;
 using FluentAssertions.Equivalency;
+using SCFirstOrderLogic.SentenceManipulation.Normalisation;
 using System;
 using System.Collections.Generic;
 
