@@ -4,13 +4,14 @@ using SCFirstOrderLogic.SentenceManipulation.Normalisation;
 using SCFirstOrderLogic.SentenceManipulation.VariableManipulation;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace SCFirstOrderLogic.Inference.Basic.Fake;
 
 /// <summary>
-/// An implementation of <see cref="IQuery"/> that uses only the most basic of unification against the directly stored clauses.
+/// An implementation of <see cref="IQuery"/> that uses only the most basic of subsumption checks against the directly stored clauses.
 /// Used by <see cref="FakeKnowledgeBase"/>.
 /// </summary>
 public class FakeQuery : IQuery
@@ -49,9 +50,7 @@ public class FakeQuery : IQuery
 
         foreach (var clause in queryGoal.Clauses)
         {
-            // todo-bug: yeah, this is wrong. If we know P(Const) and are asked P(x), the return value should be false..
-            // IsSubsumedByAnyOf to be added to core lib, perhaps?
-            if (!clause.UnifiesWithAnyOf(clauseStore))
+            if (!clauseStore.Any(c => c.Subsumes(clause)))
             {
                 result = false;
                 IsComplete = true;
