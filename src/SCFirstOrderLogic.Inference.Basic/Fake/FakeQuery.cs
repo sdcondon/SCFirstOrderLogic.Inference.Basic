@@ -49,6 +49,8 @@ public class FakeQuery : IQuery
 
         foreach (var clause in queryGoal.Clauses)
         {
+            // todo-bug: yeah, this is wrong. If we know P(Const) and are asked P(x), the return value should be false..
+            // IsSubsumedByAnyOf to be added to core lib, perhaps?
             if (!clause.UnifiesWithAnyOf(clauseStore))
             {
                 result = false;
