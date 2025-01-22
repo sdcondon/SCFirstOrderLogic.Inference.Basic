@@ -40,6 +40,9 @@ public class FeatureVectorIndexClauseStore<TNode, TFeature> : IKnowledgeBaseClau
     /// <inheritdoc />
     public async Task<bool> AddAsync(CNFClause clause, CancellationToken cancellationToken = default)
     {
+        // todo: at the mo, the fvi is providing us no real benefit, because we'll have already queued up
+        // the resolutions for the subsumed clauses. what needs to happen here is passing in a callback
+        // that ultimately ensures we dont attempt to resolve any subsumed clauses. needs a change in design.
         return await featureVectorIndex.TryReplaceSubsumedAsync(clause);
     }
 
