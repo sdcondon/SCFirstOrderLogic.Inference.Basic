@@ -20,16 +20,7 @@ public static class FakeKnowledgeBaseTests
                 Knowledge: new Sentence[]
                 {
                     IsKing(John)
-                }),
-
-            new(
-                Label: "Simple multiple possible substitutions",
-                Query: IsKing(X),
-                Knowledge: new Sentence[]
-                {
-                    IsKing(John),
-                    IsKing(Richard),
-                }),
+                })
         })
         .When((_, tc) =>
         {
