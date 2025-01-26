@@ -35,7 +35,7 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="SCFirstOrderLogic" Version="7.0.1" />
+    <PackageReference Include="SCFirstOrderLogic" Version="7.1.0" />
   </ItemGroup>
 
 </Project>
