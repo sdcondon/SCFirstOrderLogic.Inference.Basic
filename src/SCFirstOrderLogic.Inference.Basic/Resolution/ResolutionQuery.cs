@@ -89,10 +89,9 @@ public class ResolutionQuery : SteppableQuery<ClauseResolution>
         IResolutionStrategy strategy,
         CancellationToken cancellationToken = default)
     {
-        var query = new ResolutionQuery(querySentence, strategy, cancellationToken);
-
-        // NB: By awaiting here (as opposed to synchronising in the ctor itself),
+        // NB: By awaiting strategyCreation here (as opposed to synchronising in the ctor itself),
         // we don't tie up a thread for any longer than we need to.
+        var query = new ResolutionQuery(querySentence, strategy, cancellationToken);
         await query.strategyCreation;
 
         await query.strategy!.EnqueueInitialResolutionsAsync(cancellationToken);

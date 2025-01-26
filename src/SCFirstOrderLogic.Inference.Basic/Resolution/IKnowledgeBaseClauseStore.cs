@@ -1,17 +1,24 @@
 ﻿// Copyright (c) 2021-2024 Simon Condon.
 // You may use this file in accordance with the terms of the MIT license.
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace SCFirstOrderLogic.Inference.Basic.Resolution;
 
 /// <summary>
-/// Sub-type of <see cref="IClauseStore"/> for implementations intended for storing the known clauses
-/// for a knowledge base as a whole. In particular, defines a method for creating a <see cref="IQueryClauseStore"/>
-/// for storing the intermediate clauses of an individual query.
+/// Interface for types that facilitate the storage of CNF clauses for a <see cref="ResolutionKnowledgeBase"/>.
 /// </summary>
-public interface IKnowledgeBaseClauseStore : IClauseStore
+public interface IKnowledgeBaseClauseStore : IAsyncEnumerable<CNFClause>
 {
+    /// <summary>
+    /// Stores a clause if it is not already present.
+    /// </summary>
+    /// <param name="clause">The clause to store.</param>
+    /// <param name="cancellationToken">Cancellation token for the operation.</param>
+    /// <returns>True if the clause was added, false if it was already present.</returns>
+    Task<bool> AddAsync(CNFClause clause, CancellationToken cancellationToken = default);
+
     /// <summary>
     /// Creates a (disposable) copy of the current store, for storing the intermediate clauses of a particular query.
     /// </summary>

@@ -3,15 +3,23 @@
 using System;
 using System.Collections.Generic;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace SCFirstOrderLogic.Inference.Basic.Resolution;
 
 /// <summary>
-/// Sub-type of <see cref="IClauseStore"/> for types intended for storing the intermediate clauses of a particular query.
-/// Notably, is <see cref="IDisposable"/> so that any unmanaged resources can be promptly tidied away once the query is complete.
+/// Interface for types that facilitate the storage of CNF clauses for a <see cref="ResolutionQuery"/>.
 /// </summary>
-public interface IQueryClauseStore : IClauseStore, IDisposable
+public interface IQueryClauseStore : IAsyncEnumerable<CNFClause>, IDisposable
 {
+    /// <summary>
+    /// Stores a clause if it is not already present.
+    /// </summary>
+    /// <param name="clause">The clause to store.</param>
+    /// <param name="cancellationToken">Cancellation token for the operation.</param>
+    /// <returns>True if the clause was added, false if it was already present.</returns>
+    Task<bool> AddAsync(CNFClause clause, CancellationToken cancellationToken = default);
+
     /// <summary>
     /// <para>
     /// Returns all possible resolutions of a given clause with some clause in the store.

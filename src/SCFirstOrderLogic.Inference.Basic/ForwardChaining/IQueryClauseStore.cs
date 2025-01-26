@@ -4,15 +4,23 @@ using SCFirstOrderLogic.SentenceManipulation.VariableManipulation;
 using System;
 using System.Collections.Generic;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace SCFirstOrderLogic.Inference.Basic.ForwardChaining;
 
 /// <summary>
-/// Sub-type of <see cref="IClauseStore"/> for types intended for storing the intermediate clauses of a particular query.
-/// Notably, is <see cref="IDisposable"/> so that any unmanaged resources can be promptly tidied away once the query is complete.
+/// Interface for types that facilitate the storage of CNF definite clauses for a <see cref="ForwardChainingQuery"/>.
 /// </summary>
-public interface IQueryClauseStore : IClauseStore, IDisposable
+public interface IQueryClauseStore : IAsyncEnumerable<CNFDefiniteClause>, IDisposable
 {
+    /// <summary>
+    /// Stores a clause if it is not already present.
+    /// </summary>
+    /// <param name="clause">The clause to store.</param>
+    /// <param name="cancellationToken">Cancellation token for the operation.</param>
+    /// <returns>True if the clause was added, false if it was already present.</returns>
+    Task<bool> AddAsync(CNFDefiniteClause clause, CancellationToken cancellationToken = default);
+
     /// <summary>
     /// Gets all of the rules whose conjuncts contain at least one that unifies with at least one of a given set of facts.
     /// </summary>
