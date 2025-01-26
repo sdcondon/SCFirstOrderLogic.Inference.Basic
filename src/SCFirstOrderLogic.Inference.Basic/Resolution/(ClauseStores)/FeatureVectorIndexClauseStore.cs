@@ -18,22 +18,24 @@ public class FeatureVectorIndexClauseStore<TNode, TFeature> : IKnowledgeBaseClau
     where TNode : IAsyncFeatureVectorIndexNode<TFeature, CNFClause>, ICloneable, IDisposable
     where TFeature : notnull
 {
-    private readonly Func<CNFClause, IEnumerable<FeatureVectorComponent<TFeature>>> featureVectorSelector;
+    private readonly Func<CNFClause, IEnumerable<FeatureVectorComponent<TFeature>>> featureVectorMaker;
     private readonly TNode featureVectorIndexRoot;
     private readonly AsyncFeatureVectorIndex<TFeature> featureVectorIndex;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="FeatureVectorIndexClauseStore{TNode, TFeature}"/> class.
     /// </summary>
+    /// <param name="featureVectorMaker">Delegate that makes the feature vector for a given clause.</param>
+    /// <param name="featureVectorIndexRoot">The root node to use for the feature vector index.</param>
     public FeatureVectorIndexClauseStore(
-        Func<CNFClause, IEnumerable<FeatureVectorComponent<TFeature>>> featureVectorSelector,
+        Func<CNFClause, IEnumerable<FeatureVectorComponent<TFeature>>> featureVectorMaker,
         TNode featureVectorIndexRoot)
     {
-        this.featureVectorSelector = featureVectorSelector;
+        this.featureVectorMaker = featureVectorMaker;
         this.featureVectorIndexRoot = featureVectorIndexRoot;
 
         featureVectorIndex = new AsyncFeatureVectorIndex<TFeature>(
-            featureVectorSelector,
+            featureVectorMaker,
             featureVectorIndexRoot);
     }
 
@@ -55,9 +57,9 @@ public class FeatureVectorIndexClauseStore<TNode, TFeature> : IKnowledgeBaseClau
     /// <inheritdoc />
     public Task<IQueryClauseStore> CreateQueryStoreAsync(CancellationToken cancellationToken = default)
     {
-        // todo: clone -> something async?
+        // TODO-BREAKING: icloneable -> something async? might need our own interface..
         return Task.FromResult<IQueryClauseStore>(new QueryStore(
-            featureVectorSelector,
+            featureVectorMaker,
             (TNode)featureVectorIndexRoot.Clone()));
     }
 

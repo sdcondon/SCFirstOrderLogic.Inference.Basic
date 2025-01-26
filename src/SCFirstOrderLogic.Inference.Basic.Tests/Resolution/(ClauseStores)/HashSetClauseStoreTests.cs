@@ -15,7 +15,7 @@ public static class HashSetClauseStoreTests
             return store;
         })
         .WhenAsync(async store => await store.ToArrayAsync())
-        .ThenReturns((_, a) => a.Should().BeEquivalentTo(new[] { new CNFClause(new Predicate("A")), new CNFClause(new Predicate("B")) }));
+        .ThenReturns((_, a) => a.Should().BeEquivalentTo([new CNFClause(new Predicate("A")), new CNFClause(new Predicate("B"))]));
 
     public static Test Concurrency_AddDuringEnum => TestThat
         .GivenAsync(async () =>
