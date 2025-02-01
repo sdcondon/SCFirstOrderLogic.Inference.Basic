@@ -55,17 +55,22 @@ public class HashSetClauseStore : IKnowledgeBaseClauseStore
         return Task.FromResult(clauses.TryAdd(clause, 0));
     }
 
-#pragma warning disable CS1998 // async lacks await.. Could stick a Task.Yield in there, but not worth it.
     /// <inheritdoc />
     public async IAsyncEnumerator<CNFClause> GetAsyncEnumerator(CancellationToken cancellationToken = default)
     {
+        // Ensure we complete asynchronously. Clause stores are the only async thing in queries, so if we don't
+        // yield back to the context anywhere in here, we run the risk of entire queries executing synchronously,
+        // which we probably never want given the potential for queries to go on for a long time. Yes, adds overhead,
+        // and this clause store implementation is only really intended as an example (see class summary), but we
+        // should probably at least try to behave "nicely".
+        await Task.Yield();
+
         foreach (var clause in clauses.Keys)
         {
             cancellationToken.ThrowIfCancellationRequested();
             yield return clause;
         }
     }
-#pragma warning restore CS1998
 
     /// <inheritdoc />
     public Task<IQueryClauseStore> CreateQueryStoreAsync(CancellationToken cancellationToken = default)
@@ -88,17 +93,22 @@ public class HashSetClauseStore : IKnowledgeBaseClauseStore
             return Task.FromResult(clauses.TryAdd(clause, 0));
         }
 
-#pragma warning disable CS1998 // async lacks await.. Could add await Task.Yield() to silence this, but it is not worth the overhead.
         /// <inheritdoc />
         public async IAsyncEnumerator<CNFClause> GetAsyncEnumerator(CancellationToken cancellationToken = default)
         {
+            // Ensure we complete asynchronously. Clause stores are the only async thing in queries, so if we don't
+            // yield back to the context anywhere in here, we run the risk of entire queries executing synchronously,
+            // which we probably never want given the potential for queries to go on for a long time. Yes, adds overhead,
+            // and this clause store implementation is only really intended as an example (see class summary), but we
+            // should probably at least try to behave "nicely".
+            await Task.Yield();
+
             foreach (var clause in clauses.Keys)
             {
                 cancellationToken.ThrowIfCancellationRequested();
                 yield return clause;
             }
         }
-#pragma warning restore CS1998
 
         /// <inheritdoc />
         public async IAsyncEnumerable<ClauseResolution> FindResolutions(
