@@ -2,14 +2,15 @@
 using SCFirstOrderLogic.ClauseIndexing;
 using SCFirstOrderLogic.ClauseIndexing.Features;
 using SCFirstOrderLogic.ExampleDomains.FromAIaMA.Chapter9.UsingSentenceFactory;
-using SCFirstOrderLogic.SentenceManipulation.Normalisation;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using static SCFirstOrderLogic.ExampleDomains.FromAIaMA.Chapter9.UsingSentenceFactory.CuriousityAndTheCatDomain;
 using static SCFirstOrderLogic.ExampleDomains.FromAIaMA.Chapter9.UsingSentenceFactory.CrimeDomain;
 
 namespace SCFirstOrderLogic.Inference.Basic.Resolution;
 
+// TODO: not 100% fair - should factor KB initialisation out of benchmark, really.
 [MemoryDiagnoser]
 [InProcess]
 public class ResolutionKBBenchmarks
@@ -17,22 +18,8 @@ public class ResolutionKBBenchmarks
     [Benchmark]
     public static bool CrimeExample_ResolutionKB_FeatureVectorIndexClauseStore()
     {
-        var clauseStore = new FeatureVectorIndexClauseStore<CloneableAFVIListNode<MaxDepthFeature, CNFClause>, MaxDepthFeature>(
-            MaxDepthFeature.MakeFeatureVector,
-            new CloneableAFVIListNode<MaxDepthFeature, CNFClause>(MaxDepthFeature.MakeFeatureComparer()));
-
-        foreach(var sentence in CrimeDomain.Axioms)
-        {
-            foreach (var clause in sentence.ToCNF().Clauses)
-            {
-                clauseStore.AddAsync(clause).GetAwaiter().GetResult();
-            }
-        }
-
-        var kb = new ResolutionKnowledgeBase(new DelegateResolutionStrategy(
-            clauseStore,
-            DelegateResolutionStrategy.Filters.None,
-            DelegateResolutionStrategy.PriorityComparisons.UnitPreference));
+        var kb = MakeResolutionKB(MakeFVIClauseStore());
+        AddCrimeDomainAxioms(kb);
 
         return kb.AskAsync(IsCriminal(ColonelWest)).GetAwaiter().GetResult();
     }
@@ -40,10 +27,8 @@ public class ResolutionKBBenchmarks
     [Benchmark(Baseline = true)]
     public static bool CrimeExample_ResolutionKB_HashSetClauseStore()
     {
-        var kb = new ResolutionKnowledgeBase(new DelegateResolutionStrategy(
-            new HashSetClauseStore(CrimeDomain.Axioms),
-            DelegateResolutionStrategy.Filters.None,
-            DelegateResolutionStrategy.PriorityComparisons.UnitPreference));
+        var kb = MakeResolutionKB(new HashSetClauseStore());
+        AddCrimeDomainAxioms(kb);
 
         return kb.AskAsync(IsCriminal(ColonelWest)).GetAwaiter().GetResult();
     }
@@ -59,7 +44,57 @@ public class ResolutionKBBenchmarks
         {
             kb.Tell(axiom);
         }
+
         return kb.Ask(IsCriminal(ColonelWest));
+    }
+
+    [Benchmark]
+    public static bool CuriousityExample_ResolutionKB_FeatureVectorIndexClauseStore()
+    {
+        var kb = MakeResolutionKB(MakeFVIClauseStore());
+        AddCuriousityDomainAxioms(kb);
+
+        return kb.AskAsync(Kills(Curiousity, Tuna)).GetAwaiter().GetResult();
+    }
+
+    [Benchmark]
+    public static bool CuriousityExample_ResolutionKB_HashSetClauseStore()
+    {
+        var kb = MakeResolutionKB(new HashSetClauseStore());
+        AddCuriousityDomainAxioms(kb);
+
+        return kb.AskAsync(Kills(Curiousity, Tuna)).GetAwaiter().GetResult();
+    }
+
+    public static IKnowledgeBase MakeResolutionKB(IKnowledgeBaseClauseStore clauseStore)
+    {
+        return new ResolutionKnowledgeBase(new DelegateResolutionStrategy(
+            clauseStore,
+            DelegateResolutionStrategy.Filters.None,
+            DelegateResolutionStrategy.PriorityComparisons.UnitPreference));
+    }
+
+    public static IKnowledgeBaseClauseStore MakeFVIClauseStore()
+    {
+        return new FeatureVectorIndexClauseStore<CloneableAFVIListNode<MaxDepthFeature, CNFClause>, MaxDepthFeature>(
+            MaxDepthFeature.MakeFeatureVector,
+            new CloneableAFVIListNode<MaxDepthFeature, CNFClause>(MaxDepthFeature.MakeFeatureComparer()));
+    }
+
+    public static void AddCrimeDomainAxioms(IKnowledgeBase knowledgeBase)
+    {
+        foreach (var axiom in CrimeDomain.Axioms)
+        {
+            knowledgeBase.Tell(axiom);
+        }
+    }
+
+    public static void AddCuriousityDomainAxioms(IKnowledgeBase knowledgeBase)
+    {
+        foreach (var axiom in CuriousityAndTheCatDomain.Axioms)
+        {
+            knowledgeBase.Tell(axiom);
+        }
     }
 
     private class CloneableAFVIListNode<TFeature, TValue> : IAsyncFeatureVectorIndexNode<TFeature, TValue>, ICloneable, IDisposable
