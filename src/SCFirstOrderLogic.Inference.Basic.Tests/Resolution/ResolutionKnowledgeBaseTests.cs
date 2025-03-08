@@ -89,12 +89,20 @@ public static class ResolutionKnowledgeBaseTests
                 query: Kills(Curiousity, Tuna),
                 knowledge: CuriousityAndTheCatDomain.Axioms),
         })
-        .When((_, sf, tc) =>
+        .WhenAsync(async (cxt, sf, tc) =>
         {
             var knowledgeBase = new ResolutionKnowledgeBase(sf.makeStrategy());
-            knowledgeBase.Tell(tc.knowledge);
-            var query = knowledgeBase.CreateQuery(tc.query);
-            query.Execute();
+            await knowledgeBase.TellAsync(tc.knowledge);
+            var query = await knowledgeBase.CreateQueryAsync(tc.query);
+
+            var stepCount = 0;
+            while (!query.IsComplete)
+            {
+                await query.NextStepAsync();
+                stepCount++;
+            }
+
+            cxt.WriteOutput($"Total steps: {stepCount}");
             return query;
         })
         .ThenReturns()
