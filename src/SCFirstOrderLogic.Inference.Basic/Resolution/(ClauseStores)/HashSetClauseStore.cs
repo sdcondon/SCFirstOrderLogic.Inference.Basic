@@ -94,6 +94,12 @@ public class HashSetClauseStore : IKnowledgeBaseClauseStore
         }
 
         /// <inheritdoc />
+        public Task<bool> ContainsAsync(CNFClause clause, CancellationToken cancellationToken = default)
+        {
+            return Task.FromResult(clauses.ContainsKey(clause));
+        }
+
+        /// <inheritdoc />
         public async IAsyncEnumerator<CNFClause> GetAsyncEnumerator(CancellationToken cancellationToken = default)
         {
             // Ensure we complete asynchronously. Clause stores are the only async thing in queries, so if we don't

@@ -20,6 +20,8 @@ public interface IQueryClauseStore : IAsyncEnumerable<CNFClause>, IDisposable
     /// <returns>True if the clause was added, false if it was already present.</returns>
     Task<bool> AddAsync(CNFClause clause, CancellationToken cancellationToken = default);
 
+    Task<bool> ContainsAsync(CNFClause clause, CancellationToken cancellationToken = default);
+
     /// <summary>
     /// <para>
     /// Returns all possible resolutions of a given clause with some clause in the store.

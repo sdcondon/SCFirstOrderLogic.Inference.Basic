@@ -40,7 +40,7 @@ public class ResolutionQuery : SteppableQuery<ClauseResolution>
     /// Gets the (CNF representation of the) negation of the query sentence.
     /// </summary>
     public CNFSentence NegatedQuerySentence { get; }
-    
+
     /// <inheritdoc/>
     public override bool IsComplete => result.HasValue;
 
@@ -221,8 +221,8 @@ public class ResolutionQuery : SteppableQuery<ClauseResolution>
 
             // If we find the same clause "earlier" than another encounter of it,
             // remove the "later" one so that once we reverse the list, there are no
-                // references to clauses we've not seen yet.
-                orderedSteps.Remove(clause);
+            // references to clauses we've not seen yet.
+            orderedSteps.Remove(clause);
 
             // If the clause is an intermediate one from the query (as opposed to one found
             // in the knowledge base or negated query)..

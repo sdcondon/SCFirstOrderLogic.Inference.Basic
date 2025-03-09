@@ -177,9 +177,17 @@ public class DelegateResolutionStrategy : IResolutionStrategy
             this.priorityQueue = new MaxPriorityQueue<ClauseResolution>(priorityComparison);
         }
 
-        public bool IsQueueEmpty => priorityQueue.Count == 0;
+        public bool IsQueueEmpty => !HasNextEffectiveQueuedResolution();
 
-        public ClauseResolution DequeueResolution() => priorityQueue.Dequeue();
+        public ClauseResolution DequeueResolution()
+        {
+            if (!HasNextEffectiveQueuedResolution())
+            {
+                throw new InvalidOperationException("Resolutions exhausted!");
+            }
+
+            return priorityQueue.Dequeue();
+        }
 
         public void Dispose() => clauseStore.Dispose();
 
@@ -214,10 +222,8 @@ public class DelegateResolutionStrategy : IResolutionStrategy
         public async Task EnqueueResolutionsAsync(CNFClause clause, CancellationToken cancellationToken)
         {
             // Check if we've found a new clause (i.e. something that we didn't know already).
-            // NB: Upside of using Add to implicitly check for existence: it means we don't need a separate "Contains" method
-            // on the store (which would raise potential misunderstandings about what the store means by "contains" - c.f. subsumption..)
             // Downside of using Add: clause store will encounter itself when looking for unifiers - not a big deal,
-            // but a performance/maintainability tradeoff nonetheless.
+            // but a performance/simplicity tradeoff nonetheless.
             if (await clauseStore.AddAsync(clause, cancellationToken))
             {
                 // This is a new clause, so find and queue up its resolutions.
@@ -232,6 +238,34 @@ public class DelegateResolutionStrategy : IResolutionStrategy
                     }
                 }
             }
+        }
+
+        // side-effect: consumes non-effective from queue. yeah, this is ugly code..
+        private bool HasNextEffectiveQueuedResolution()
+        {
+            do
+            {
+                if (priorityQueue.Count == 0)
+                {
+                    return false;
+                }
+
+                var nextResolution = priorityQueue.Peek();
+
+                // non-effective if either of the resolving clauses are no longer in the store (which will be because they are
+                // subsumed by another clause since added). Potentially more efficient to remove resolutions from the queue as
+                // the subsumed clauses are removed, but this would require more complexity in the queue itself to allow this.
+                // For now, this approach will do.
+                if (!clauseStore.ContainsAsync(nextResolution.Clause1).GetAwaiter().GetResult() || !clauseStore.ContainsAsync(nextResolution.Clause2).GetAwaiter().GetResult())
+                {
+                    priorityQueue.Dequeue(); // nb - no thread safety here, but that's fine for now at least
+                }
+                else
+                {
+                    return true;
+                }
+            }
+            while (true);
         }
     }
 }
