@@ -18,8 +18,8 @@ public static partial class ClauseResolutionTests
     private record TestCase(CNFClause Clause1, CNFClause Clause2, params CNFClause[] ExpectedResolvents);
 
     public static Test Resolution => TestThat
-        .GivenEachOf<TestCase>(() => new TestCase[]
-        {
+        .GivenEachOf<TestCase>(() =>
+        [
             // Modus Ponens resolution with a constant
             new(
                 Clause1: new(!S(C) | T(C)), // S(C) => T(C)
@@ -63,25 +63,25 @@ public static partial class ClauseResolutionTests
                 Clause1: new(!S(D) | !T(X)), 
                 // ¬T(C) ⇒ S(Y). In human e.g.: "If TShirtLover is not wearing a T-shirt, everyone is wearing a snowshoes"
                 Clause2: new(T(C) | S(Y)),
-                ExpectedResolvents: new CNFClause[]
-                {
+                ExpectedResolvents:
+                [
                     // {X/C} gives ∀Y, S(Y) ∨ ¬S(D) (that is, S(D) ⇒ S(Y)). If D is S, everything is. (If snowshoehater is wearing snowshoes, everyone is)
                     // NB: becomes obvious by forward chaining Clause1 to Clause2.
                     new(S(Y) | !S(D)), 
                     // {Y/D} gives ∀X, T(C) ∨ ¬T(X) (that is, T(X) ⇒ T(C)). If anything is T, C is. (If anyone is wearing a T-shirt, TShirtLover is)
                     // NB: becomes obvious by forward chaining contrapositive of Clause1 to contrapositive of Clause2.
                     new(T(C) | !T(X)),
-                }),
+                ]),
 
             // Variable chain (y=x/x=d) - ordering shouldn't matter
             new(
                 Clause1: new(!V(Y, D) | !V(C, Y)), // e.g. ¬Equals(C, y) ∨ ¬Equals(D, y)
                 Clause2: new(V(X, X)), // e.g. Equals(x, x)       
-                ExpectedResolvents: new CNFClause[]
-                {
+                ExpectedResolvents:
+                [
                     new(!V(C, D)), // ¬Equals(C, D) 
                     new(!V(C, D)), // ¬Equals(C, D) - don't mind that its returned twice. 
-                }),
+                ]),
 
             // Variable chain - ordering shouldn't matter
             ////new(
@@ -97,30 +97,30 @@ public static partial class ClauseResolutionTests
             new(
                 Clause1: new CNFClause(S(C)),
                 Clause2: new CNFClause(T(C)),
-                ExpectedResolvents: Array.Empty<CNFClause>()),
+                ExpectedResolvents: []),
 
             // Unresolvable - Multiple trivially true resolvents
             new(
                 Clause1: new CNFClause(S(C) | !T(C)),
                 Clause2: new CNFClause(!S(C) | T(C)),
-                ExpectedResolvents: new CNFClause[]
-                {
+                ExpectedResolvents:
+                [
                     // Both of these resolvents are trivially true - we expect them to not be returned
                     ////new CNFClause(S(C) | !S(C)),
                     ////new CNFClause(T(C) | !T(C))
-                }),
+                ]),
 
             // Unresolvable - Multiple trivially true resolvents (with variables..)
             new(
                 Clause1: new CNFClause(V(X, Y) | !V(Y, X)),
                 Clause2: new CNFClause(V(X, Y) | !V(Y, X)),
-                ExpectedResolvents: new CNFClause[]
-                {
+                ExpectedResolvents:
+                [
                     // Both of these resolvents are trivially true - we expect them to not be returned
                     ////new CNFClause(V(X, X) | !V(X, X)), // with {Y/X}
                     ////new CNFClause(V(Y, Y) | !V(Y, Y)), // with {X/Y}
-                }),
-        })
+                ]),
+        ])
         .When(g => ClauseResolution.Resolve(g.Clause1, g.Clause2))
         .ThenReturns(((g, r) => r.Select(u => u.Resolvent).Should().BeEquivalentTo(g.ExpectedResolvents)));
 }
