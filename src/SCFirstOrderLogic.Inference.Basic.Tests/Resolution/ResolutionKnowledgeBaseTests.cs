@@ -18,141 +18,153 @@ namespace SCFirstOrderLogic.Inference.Basic.Resolution;
 
 public static class ResolutionKnowledgeBaseTests
 {
-    public static Test PositiveScenarios => TestThat
+    public static Test BasicPositiveScenarios => TestThat
         .GivenTestContext()
         .AndEachOf(() => new StrategyFactory[]
         {
-            new(DelegateResolutionStrategy_WithHashSetClauseStore),
-            new(DelegateResolutionStrategy_WithFVIClauseStore),
-            //new(NewLinearResolutionStrategy),
+            new(DelegateStrategyWithHashSetClauseStore),
+            new(DelegateStrategyWithFVIClauseStore),
+            //new(LinearStrategy_WithFVIClauseStore),
         })
         .AndEachOf(() => new TestCase[]
         {
-            new( // trivial
-                query: IsKing(John),
-                knowledge: new Sentence[]
-                {
+            new( // Trivial
+                Query: IsKing(John),
+                Knowledge:
+                [
                     IsKing(John)
-                }),
+                ]),
 
-            new( // single conjunct, single step
-                query: IsEvil(John),
-                knowledge: new Sentence[]
-                {
+            new( // Single conjunct, single step
+                Query: IsEvil(John),
+                Knowledge:
+                [
                     IsGreedy(John),
                     AllGreedyAreEvil
-                }),
+                ]),
 
             new( // Two conjuncts, single step
-                query: IsEvil(John),
-                knowledge: new Sentence[]
-                {
+                Query: IsEvil(John),
+                Knowledge:
+                [
                     IsGreedy(John),
                     IsKing(John),
                     AllGreedyKingsAreEvil
-                }),
+                ]),
 
             new( // Two applicable rules, each with two conjuncts, single step
-                query: ThereExists(X, IsEvil(X)),
-                knowledge: new Sentence[]
-                {
+                Query: ThereExists(X, IsEvil(X)),
+                Knowledge:
+                [
                     IsKing(John),
                     IsGreedy(Mary),
                     IsQueen(Mary),
                     AllGreedyKingsAreEvil,
                     AllGreedyQueensAreEvil,
-                }),
+                ]),
 
             new( // Multiple possible substitutions
-                query: ThereExists(X, IsKing(X)),
-                knowledge: new Sentence[]
-                {
+                Query: ThereExists(X, IsKing(X)),
+                Knowledge:
+                [
                     IsKing(John),
                     IsKing(Richard),
-                }),
+                ]),
 
             new( // Uses same var twice in same proof
-                query: Knows(John, Mary),
-                knowledge: new Sentence[]
-                {
+                Query: Knows(John, Mary),
+                Knowledge:
+                [
                     AllGreedyAreEvil,
                     AllEvilKnowEachOther,
                     IsGreedy(John),
                     IsGreedy(Mary),
-                }),
-
-            new( // More complex - Crime example domain
-                query: IsCriminal(ColonelWest),
-                knowledge: CrimeDomain.Axioms),
-
-            new( // More complex with some non-definite clauses - curiousity and the cat example domain
-                query: Kills(Curiousity, Tuna),
-                knowledge: CuriousityAndTheCatDomain.Axioms),
+                ]),
         })
-        .WhenAsync(async (cxt, sf, tc) =>
-        {
-            var knowledgeBase = new ResolutionKnowledgeBase(sf.makeStrategy());
-            await knowledgeBase.TellAsync(tc.knowledge);
-            var query = await knowledgeBase.CreateQueryAsync(tc.query);
-
-            var stepCount = 0;
-            while (!query.IsComplete)
-            {
-                await query.NextStepAsync();
-                stepCount++;
-            }
-
-            cxt.WriteOutput($"Total steps: {stepCount}");
-            return query;
-        })
+        .WhenAsync(MakeKBAndExecuteQueryAsync)
         .ThenReturns()
         .And((_, _, _, q) => q.Result.Should().BeTrue())
         .And((cxt, _, _, q) => cxt.WriteOutput(q.ResultExplanation));
 
-    public static Test NegativeScenarios => TestThat
-        .GivenEachOf(() => new StrategyFactory[]
-        {
-            new(DelegateResolutionStrategy_WithHashSetClauseStore),
-            new(DelegateResolutionStrategy_WithFVIClauseStore),
-            //new(NewLinearResolutionStrategy),
-        })
-        .AndEachOf(() => new TestCase[]
-        {
-            new( // no matching clause
-                query: IsEvil(John),
-                knowledge: new Sentence[]
-                {
+    public static Test BasicNegativeScenarios => TestThat
+        .GivenTestContext()
+        .AndEachOf<StrategyFactory>(() =>
+        [
+            new(DelegateStrategyWithHashSetClauseStore),
+            new(DelegateStrategyWithFVIClauseStore),
+            //new(LinearStrategy_WithFVIClauseStore),
+        ])
+        .AndEachOf<TestCase>(() =>
+        [
+            new( // No matching clause
+                Query: IsEvil(John),
+                Knowledge:
+                [
                     IsKing(John),
                     IsGreedy(John),
-                }),
+                ]),
 
-            new( // clause with not all conjuncts satisfied
-                query: IsEvil(John),
-                knowledge: new Sentence[]
-                {
+            new( // Clause with not all conjuncts satisfied
+                Query: IsEvil(John),
+                Knowledge:
+                [
                     IsKing(John),
                     AllGreedyKingsAreEvil,
-                }),
+                ]),
 
-            new( // no unifier will work - x is either John or Richard - it can't be both:
-                query: ThereExists(X, IsEvil(X)),
-                knowledge: new Sentence[]
-                {
+            new( // No unifier will work - x is either John or Richard - it can't be both:
+                Query: ThereExists(X, IsEvil(X)),
+                Knowledge:
+                [
                     IsKing(John),
                     IsGreedy(Richard),
                     AllGreedyKingsAreEvil,
-                }),
-        })
-        .When((sf, tc) =>
-        {
-            var knowledgeBase = new ResolutionKnowledgeBase(sf.makeStrategy());
-            knowledgeBase.Tell(tc.knowledge);
-            var query = knowledgeBase.CreateQuery(tc.query);
-            query.Execute();
-            return query;
-        })
+                ]),
+        ])
+        .WhenAsync(MakeKBAndExecuteQueryAsync)
         .ThenReturns()
-        .And((_, _, q) => q.Result.Should().BeFalse());
+        .And((_, _, _, q) => q.Result.Should().BeFalse());
+
+    public static Test ComplexPositiveScenarios => TestThat
+        .GivenTestContext()
+        .AndEachOf<StrategyFactory>(() =>
+        [
+            new(DelegateStrategyWithHashSetClauseStore),
+            new(DelegateStrategyWithFVIClauseStore),
+            //new(LinearStrategy_WithFVIClauseStore),
+        ])
+        .AndEachOf<TestCase>(() =>
+        [
+            new(
+                Query: IsCriminal(ColonelWest),
+                Knowledge: CrimeDomain.Axioms),
+
+            new(
+                Query: Kills(Curiousity, Tuna),
+                Knowledge: CuriousityAndTheCatDomain.Axioms),
+        ])
+        .WhenAsync(MakeKBAndExecuteQueryAsync)
+        .ThenReturns()
+        .And((_, _, _, q) => q.Result.Should().BeTrue())
+        .And((cxt, _, _, q) => cxt.WriteOutput(q.ResultExplanation));
+
+    // This is a difficult query. Would need more complex algo to deal with it
+    // in a timely fashion. Better way of handling equality, better prioritisation, etc.
+    ////public static Test KinshipExample => TestThat
+    ////    .GivenTestContext()
+    ////    .WhenAsync(async _ =>
+    ////    {
+    ////        var resolutionStrategy = DelegateResolutionStrategy_WithFVIClauseStore();
+    ////        var innerKb = new ResolutionKnowledgeBase(resolutionStrategy);
+    ////        var kb = await EqualityAxiomisingKnowledgeBase.CreateAsync(innerKb);
+    ////        await kb.TellAsync(KinshipDomain.Axioms);
+    ////        var query = await kb.CreateQueryAsync(ForAll(X, Y, Iff(IsSibling(X, Y), IsSibling(Y, X))));
+    ////        await query.ExecuteAsync();
+    ////        return query;
+    ////    })
+    ////    .ThenReturns()
+    ////    .And((_, retVal) => retVal.Result.Should().Be(true))
+    ////    .And((ctx, retVal) => ctx.WriteOutputLine(((ResolutionQuery)retVal).ResultExplanation));
 
     public static Test RepeatedQueryExecution => TestThat
         .Given(() =>
@@ -182,62 +194,59 @@ public static class ResolutionKnowledgeBaseTests
             (rv.task1.IsFaulted ^ rv.task2.IsFaulted).Should().BeTrue();
         });
 
-    // This is a difficult query. Would need more complex algo to deal with it
-    // in a timely fashion. Better way of handling equality, better prioritisation, etc.
-    ////public static Test KinshipExample => TestThat
-    ////    .GivenTestContext()
-    ////    .WhenAsync(async _ =>
-    ////    {
-    ////        var resolutionStrategy = new LinearResolutionStrategy(new HashSetClauseStore());
-    ////        var innerKb = new ResolutionKnowledgeBase(resolutionStrategy);
-    ////        var kb = await EqualityAxiomisingKnowledgeBase.CreateAsync(innerKb);
-    ////        await kb.TellAsync(KinshipDomain.Axioms);
-    ////        var query = await kb.CreateQueryAsync(ForAll(X, Y, Iff(IsSibling(X, Y), IsSibling(Y, X))));
-    ////        await query.ExecuteAsync();
-    ////        return query;
-    ////    })
-    ////    .ThenReturns()
-    ////    .And((_, retVal) => retVal.Result.Should().Be(true))
-    ////    .And((ctx, retVal) => ctx.WriteOutputLine(((ResolutionQuery)retVal).ResultExplanation));
-
-    private static IResolutionStrategy DelegateResolutionStrategy_WithHashSetClauseStore() => new DelegateResolutionStrategy(
+    private static IResolutionStrategy DelegateStrategyWithHashSetClauseStore() => new DelegateResolutionStrategy(
         new HashSetClauseStore(),
         DelegateResolutionStrategy.Filters.None,
         DelegateResolutionStrategy.PriorityComparisons.UnitPreference);
 
-    // todo: can't use parameterless MakeFeatureComparer - needs to be able to deal with skolem fn and standardised variable ids
-    // (and in general the equality identifier isn't a string either). prob need to provide some facility to help deal with this.
-    private static IResolutionStrategy DelegateResolutionStrategy_WithFVIClauseStore() => new DelegateResolutionStrategy(
+    private static IResolutionStrategy DelegateStrategyWithFVIClauseStore() => new DelegateResolutionStrategy(
         new FeatureVectorIndexClauseStore<CloneableAFVIListNode<MaxDepthFeature, CNFClause>, MaxDepthFeature>(
             MaxDepthFeature.MakeFeatureVector,
             new CloneableAFVIListNode<MaxDepthFeature, CNFClause>(MaxDepthFeature.MakeFeatureComparer())),
         DelegateResolutionStrategy.Filters.None,
         DelegateResolutionStrategy.PriorityComparisons.UnitPreference);
 
-    //// private static IResolutionStrategy NewLinearResolutionStrategy() => new LinearResolutionStrategy(new HashSetClauseStore());
+    ////private static IResolutionStrategy LinearStrategyWithFVIClauseStore() => new LinearResolutionStrategy(
+    ////    new FeatureVectorIndexClauseStore<CloneableAFVIListNode<MaxDepthFeature, CNFClause>, MaxDepthFeature>(
+    ////        MaxDepthFeature.MakeFeatureVector,
+    ////        new CloneableAFVIListNode<MaxDepthFeature, CNFClause>(MaxDepthFeature.MakeFeatureComparer())));
+
+    private static async Task<ResolutionQuery> MakeKBAndExecuteQueryAsync(ITestContext cxt, StrategyFactory sf, TestCase tc)
+    {
+        var knowledgeBase = new ResolutionKnowledgeBase(sf.MakeStrategy());
+        await knowledgeBase.TellAsync(tc.Knowledge);
+        var query = await knowledgeBase.CreateQueryAsync(tc.Query);
+
+        var stepCount = 0;
+        while (!query.IsComplete)
+        {
+            await query.NextStepAsync();
+            stepCount++;
+        }
+
+        cxt.WriteOutput($"Total steps: {stepCount}");
+        return query;
+    }
 
     private record StrategyFactory(
-        Func<IResolutionStrategy> makeStrategy,
-        [CallerArgumentExpression("makeStrategy")] string? makeStrategyExpression = null)
+        Func<IResolutionStrategy> MakeStrategy,
+        [CallerArgumentExpression(nameof(MakeStrategy))] string? MakeStrategyExpression = null)
     {
-        public override string ToString() => makeStrategyExpression!;
+        public override string ToString() => MakeStrategyExpression!;
     }
 
     private record TestCase(
-        Sentence query,
-        IEnumerable<Sentence> knowledge,
-        [CallerArgumentExpression("knowledge")] string? knowledgeExpression = null)
+        Sentence Query,
+        IEnumerable<Sentence> Knowledge,
+        [CallerArgumentExpression(nameof(Knowledge))] string? KnowledgeExpression = null)
     {
-        public override string ToString() => $"{query}; given knowledge: {knowledgeExpression}";
+        public override string ToString() => $"given {KnowledgeExpression}, {Query}";
     }
 
-    private class CloneableAFVIListNode<TFeature, TValue> : IAsyncFeatureVectorIndexNode<TFeature, TValue>, ICloneable, IDisposable
-    where TFeature : notnull
+    private class CloneableAFVIListNode<TFeature, TValue>(IComparer<TFeature> featureComparer) : IAsyncFeatureVectorIndexNode<TFeature, TValue>, ICloneable, IDisposable
+        where TFeature : notnull
     {
-        private readonly AsyncFeatureVectorIndexListNode<TFeature, TValue> innerNode;
-
-        public CloneableAFVIListNode(IComparer<TFeature> featureComparer) =>
-            innerNode = new AsyncFeatureVectorIndexListNode<TFeature, TValue>(featureComparer);
+        private readonly AsyncFeatureVectorIndexListNode<TFeature, TValue> innerNode = new(featureComparer);
 
         public IComparer<TFeature> FeatureComparer =>
             innerNode.FeatureComparer;
