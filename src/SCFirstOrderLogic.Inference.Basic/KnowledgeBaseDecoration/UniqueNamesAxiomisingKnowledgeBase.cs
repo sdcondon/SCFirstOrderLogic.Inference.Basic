@@ -46,7 +46,7 @@ public class UniqueNamesAxiomisingKnowledgeBase : IKnowledgeBase
     public async Task TellAsync(Sentence sentence, CancellationToken cancellationToken = default)
     {
         await innerKnowledgeBase.TellAsync(sentence, cancellationToken);
-        uniqueNameAxiomiser.Visit(sentence);
+        await uniqueNameAxiomiser.VisitAsync(sentence);
     }
 
     /// <inheritdoc/>
@@ -55,7 +55,7 @@ public class UniqueNamesAxiomisingKnowledgeBase : IKnowledgeBase
         return innerKnowledgeBase.CreateQueryAsync(query, cancellationToken);
     }
 
-    private class UniqueNamesAxiomiser : RecursiveSentenceVisitor
+    private class UniqueNamesAxiomiser : RecursiveAsyncSentenceVisitor
     {
         private readonly IKnowledgeBase innerKnowledgeBase;
 
@@ -68,14 +68,13 @@ public class UniqueNamesAxiomisingKnowledgeBase : IKnowledgeBase
             this.innerKnowledgeBase = innerKnowledgeBase;
         }
 
-        public override void Visit(Function function)
+        public override async Task VisitAsync(Function function)
         {
             if (function.Arguments.Count == 0 && !knownConstants.Contains(function))
             {
                 foreach (var knownConstant in knownConstants)
                 {
-                    // TODO-PERFORMANCE: potentially long-running. Perhaps add some async visitor types?
-                    innerKnowledgeBase.TellAsync(Not(AreEqual(function, knownConstant))).GetAwaiter().GetResult();
+                    await innerKnowledgeBase.TellAsync(Not(AreEqual(function, knownConstant)));
                 }
 
                 knownConstants.Add(function);

@@ -66,7 +66,7 @@ public class EqualityAxiomisingKnowledgeBase : IKnowledgeBase
     public async Task TellAsync(Sentence sentence, CancellationToken cancellationToken = default)
     {
         await innerKnowledgeBase.TellAsync(sentence, cancellationToken);
-        predicateAndFunctionEqualityAxiomiser.Visit(sentence);
+        await predicateAndFunctionEqualityAxiomiser.VisitAsync(sentence);
     }
 
     /// <inheritdoc/>
@@ -75,7 +75,7 @@ public class EqualityAxiomisingKnowledgeBase : IKnowledgeBase
         return innerKnowledgeBase.CreateQueryAsync(query, cancellationToken);
     }
 
-    private class PredicateAndFunctionEqualityAxiomiser : RecursiveSentenceVisitor
+    private class PredicateAndFunctionEqualityAxiomiser : RecursiveAsyncSentenceVisitor
     {
         // nb: initially empty hash sets here are the real problem being referred to in the 
         // nb#1 in the class summary. means that, in the external storage case, we'll be (trying to) 
@@ -89,7 +89,7 @@ public class EqualityAxiomisingKnowledgeBase : IKnowledgeBase
             this.innerKnowledgeBase = innerKnowledgeBase;
         }
 
-        public override void Visit(Predicate predicate)
+        public override async Task VisitAsync(Predicate predicate)
         {
             // NB: we check only for the identifier, not for the identifier with the particular
             // argument count. A fairly safe assumption that we could nevertheless eliminate at some point.
@@ -118,14 +118,13 @@ public class EqualityAxiomisingKnowledgeBase : IKnowledgeBase
                     sentence = ForAll(leftArgs[i].Declaration, ForAll(rightArgs[i].Declaration, sentence));
                 }
 
-                // TODO-PERFORMANCE: potentially long-running. Perhaps add some async visitor types?
-                innerKnowledgeBase.TellAsync(sentence).GetAwaiter().GetResult();
+                await innerKnowledgeBase.TellAsync(sentence);
             }
 
-            base.Visit(predicate);
+            await base.VisitAsync(predicate);
         }
 
-        public override void Visit(Function function)
+        public override async Task VisitAsync(Function function)
         {
             // NB: we check only for the identifier, not for the identifier with the particular
             // argument count. A fairly safe assumption that we could nevertheless eliminate at some point.
@@ -154,11 +153,10 @@ public class EqualityAxiomisingKnowledgeBase : IKnowledgeBase
                     sentence = ForAll(leftArgs[i].Declaration, ForAll(rightArgs[i].Declaration, sentence));
                 }
 
-                // TODO-PERFORMANCE: potentially long-running. Perhaps add some async visitor types?
-                innerKnowledgeBase.TellAsync(sentence).GetAwaiter().GetResult();
+                await innerKnowledgeBase.TellAsync(sentence);
             }
 
-            base.Visit(function);
+            await base.VisitAsync(function);
         }
     }
 }
