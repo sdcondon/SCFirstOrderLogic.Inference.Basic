@@ -218,13 +218,11 @@ public class ResolutionQuery : SteppableQuery<ClauseResolution>
         while (queue.Count > 0)
         {
             var clause = queue.Dequeue();
-            if (orderedSteps.Contains(clause))
-            {
-                // We have found the same clause "earlier" than another encounter of it.
-                // Remove the "later" one so that once we reverse the list, there are no
+
+            // If we find the same clause "earlier" than another encounter of it,
+            // remove the "later" one so that once we reverse the list, there are no
                 // references to clauses we've not seen yet.
                 orderedSteps.Remove(clause);
-            }
 
             // If the clause is an intermediate one from the query (as opposed to one found
             // in the knowledge base or negated query)..
