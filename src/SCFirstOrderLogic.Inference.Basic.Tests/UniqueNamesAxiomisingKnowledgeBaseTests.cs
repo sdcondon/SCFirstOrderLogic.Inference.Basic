@@ -24,15 +24,15 @@ public static class UniqueNamesAxiomisingKnowledgeBaseTests
         .And(kb =>
         {
             kb.Sentences.Should().BeEquivalentTo(
-                expectation: new Sentence[]
-                {
+                expectation:
+                [
                     IsMale(new Function("Bob")), // Sentence that we told it
                     IsMale(new Function("Larry")), // Sentence that we told it
                     Not(IsMale(new Function("Alex"))), // Sentence that we told it
                     Not(AreEqual(new Function("Larry"), new Function("Bob"))),
                     Not(AreEqual(new Function("Alex"), new Function("Bob"))),
                     Not(AreEqual(new Function("Alex"), new Function("Larry"))),
-                },
+                ],
                 config: EquivalencyOptions.UsingOnlyConsistencyForVariables);
         });
 
