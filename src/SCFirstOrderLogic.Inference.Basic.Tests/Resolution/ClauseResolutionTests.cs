@@ -1,20 +1,12 @@
 ﻿using FluentAssertions;
 using FlUnit;
-using System;
 using System.Linq;
-using static SCFirstOrderLogic.SentenceCreation.OperableSentenceFactory;
+using static SCFirstOrderLogic.SentenceCreation.Specialised.GenericDomainOperableSentenceFactory;
 
 namespace SCFirstOrderLogic.Inference.Basic.Resolution;
 
 public static partial class ClauseResolutionTests
 {
-    private static Term C => new Function(nameof(C));
-    private static Term D => new Function(nameof(D));
-    private static OperablePredicate S(Term t) => new Predicate(nameof(S), t);
-    private static OperablePredicate T(Term t) => new Predicate(nameof(T), t);
-    private static OperablePredicate U(Term t) => new Predicate(nameof(U), t);
-    private static OperablePredicate V(Term t, Term u) => new Predicate(nameof(V), t, u);
-
     private record TestCase(CNFClause Clause1, CNFClause Clause2, params CNFClause[] ExpectedResolvents);
 
     public static Test Resolution => TestThat
@@ -22,103 +14,103 @@ public static partial class ClauseResolutionTests
         [
             // Modus Ponens resolution with a constant
             new(
-                Clause1: new(!S(C) | T(C)), // S(C) => T(C)
-                Clause2: new(S(C)),
-                ExpectedResolvents: new CNFClause(T(C))),
+                Clause1: new(!P(C) | Q(C)), // P(C) => Q(C)
+                Clause2: new(P(C)),
+                ExpectedResolvents: new CNFClause(Q(C))),
 
             // Modus Ponens resolution on a globally quantified variable & a constant
             new(
-                Clause1: new(!S(X) | T(X)), // ∀X, S(X) => T(X)
-                Clause2: new(S(C)),
-                ExpectedResolvents: new CNFClause(T(C))), // {X/C}
+                Clause1: new(!P(X) | Q(X)), // ∀X, P(X) => Q(X)
+                Clause2: new(P(C)),
+                ExpectedResolvents: new CNFClause(Q(C))), // {X/C}
 
             // Modus Ponens resolution on a constant & a globally quantified variable
             new(
-                Clause1: new(!S(C) | T(C)), // S(C) => T(C)
-                Clause2: new(S(X)),
-                ExpectedResolvents: new CNFClause(T(C))), // {X/C}
+                Clause1: new(!P(C) | Q(C)), // P(C) => Q(C)
+                Clause2: new(P(X)),
+                ExpectedResolvents: new CNFClause(Q(C))), // {X/C}
 
             // Modus Ponens resolution on a globally quantified variable
             new(
-                Clause1: new(!S(X) | T(X)), // ∀X, S(X) => T(X)
-                Clause2: new(S(Y)),
-                ExpectedResolvents: new CNFClause(T(Y))), // {Y/X} .. Or {X/Y}, giving T(X). Should really accept either..
+                Clause1: new(!P(X) | Q(X)), // ∀X, P(X) => Q(X)
+                Clause2: new(P(Y)),
+                ExpectedResolvents: new CNFClause(Q(Y))), // {Y/X} .. Or {X/Y}, giving T(X). Should really accept either..
 
             // More complicated - with a constant
             new(
-                Clause1: new(!S(C) | T(C)), // ¬S(C) ∨ T(C)
-                Clause2: new(S(C) | U(C)), // S(C) ∨ U(C)
-                ExpectedResolvents: new CNFClause(T(C) | U(C))),
+                Clause1: new(!P(C) | Q(C)), // ¬P(C) ∨ Q(C)
+                Clause2: new(P(C) | R(C)), // P(C) ∨ R(C)
+                ExpectedResolvents: new CNFClause(Q(C) | R(C))),
 
             // Complementary unit clauses
             new(
-                Clause1: new(S(C)),
-                Clause2: new(!S(C)),
+                Clause1: new(P(C)),
+                Clause2: new(!P(C)),
                 ExpectedResolvents: CNFClause.Empty),
 
             // Multiply-resolvable clauses
             // There's probably a better (more intuitive) human-language example, here
             new(
-                // S(D) ⇒ ¬T(X). In human, e.g.: "If SnowShoeHater is wearing snowshoes, no-one is wearing a T-shirt"
-                Clause1: new(!S(D) | !T(X)), 
-                // ¬T(C) ⇒ S(Y). In human e.g.: "If TShirtLover is not wearing a T-shirt, everyone is wearing a snowshoes"
-                Clause2: new(T(C) | S(Y)),
+                // P(D) ⇒ ¬Q(X). In human, e.g.: "If SnowShoeHater is wearing snowshoes, no-one is wearing a T-shirt"
+                Clause1: new(!P(D) | !Q(X)), 
+                // ¬Q(C) ⇒ P(Y). In human e.g.: "If TShirtLover is not wearing a T-shirt, everyone is wearing a snowshoes"
+                Clause2: new(Q(C) | P(Y)),
                 ExpectedResolvents:
                 [
-                    // {X/C} gives ∀Y, S(Y) ∨ ¬S(D) (that is, S(D) ⇒ S(Y)). If D is S, everything is. (If snowshoehater is wearing snowshoes, everyone is)
+                    // {X/C} gives ∀Y, P(Y) ∨ ¬P(D) (that is, P(D) ⇒ P(Y)). If D is P, everything is. (If snowshoehater is wearing snowshoes, everyone is)
                     // NB: becomes obvious by forward chaining Clause1 to Clause2.
-                    new(S(Y) | !S(D)), 
-                    // {Y/D} gives ∀X, T(C) ∨ ¬T(X) (that is, T(X) ⇒ T(C)). If anything is T, C is. (If anyone is wearing a T-shirt, TShirtLover is)
+                    new(P(Y) | !P(D)), 
+                    // {Y/D} gives ∀X, Q(C) ∨ ¬Q(X) (that is, Q(X) ⇒ Q(C)). If anything is Q, C is. (If anyone is wearing a T-shirt, TShirtLover is)
                     // NB: becomes obvious by forward chaining contrapositive of Clause1 to contrapositive of Clause2.
-                    new(T(C) | !T(X)),
+                    new(Q(C) | !Q(X)),
                 ]),
 
             // Variable chain (y=x/x=d) - ordering shouldn't matter
             new(
-                Clause1: new(!V(Y, D) | !V(C, Y)), // e.g. ¬Equals(C, y) ∨ ¬Equals(D, y)
-                Clause2: new(V(X, X)), // e.g. Equals(x, x)       
+                Clause1: new(!P(Y, D) | !P(C, Y)), // e.g. ¬Equals(C, y) ∨ ¬Equals(D, y)
+                Clause2: new(P(X, X)), // e.g. Equals(x, x)       
                 ExpectedResolvents:
                 [
-                    new(!V(C, D)), // ¬Equals(C, D) 
-                    new(!V(C, D)), // ¬Equals(C, D) - don't mind that its returned twice. 
+                    new(!P(C, D)), // ¬Equals(C, D) 
+                    new(!P(C, D)), // ¬Equals(C, D) - don't mind that its returned twice. 
                 ]),
 
             // Variable chain - ordering shouldn't matter
             ////new(
-            ////    Clause1: new CNFClause(V(X, X)), // e.g. Equals(x, x)     
-            ////    Clause2: new CNFClause(!V(Y, D) | !V(C, Y)), // e.g. ¬Equals(C, y) ∨ ¬Equals(D, y)
+            ////    Clause1: new CNFClause(P(X, X)), // e.g. Equals(x, x)     
+            ////    Clause2: new CNFClause(!P(Y, D) | !P(C, Y)), // e.g. ¬Equals(C, y) ∨ ¬Equals(D, y)
             ////    ExpectedResolvents: new[]
             ////    {
-            ////        new CNFClause(!V(C, D)), // ¬Equals(C, D) 
-            ////        new CNFClause(!V(C, D)), // ¬Equals(C, D) - don't mind that its returned twice. 
+            ////        new CNFClause(!P(C, D)), // ¬Equals(C, D) 
+            ////        new CNFClause(!P(C, D)), // ¬Equals(C, D) - don't mind that its returned twice. 
             ////    }),
 
             // Unresolvable - different predicates only
             new(
-                Clause1: new CNFClause(S(C)),
-                Clause2: new CNFClause(T(C)),
+                Clause1: new CNFClause(P(C)),
+                Clause2: new CNFClause(Q(C)),
                 ExpectedResolvents: []),
 
             // Unresolvable - Multiple trivially true resolvents
             new(
-                Clause1: new CNFClause(S(C) | !T(C)),
-                Clause2: new CNFClause(!S(C) | T(C)),
+                Clause1: new CNFClause(P(C) | !Q(C)),
+                Clause2: new CNFClause(!P(C) | Q(C)),
                 ExpectedResolvents:
                 [
                     // Both of these resolvents are trivially true - we expect them to not be returned
-                    ////new CNFClause(S(C) | !S(C)),
-                    ////new CNFClause(T(C) | !T(C))
+                    ////new CNFClause(P(C) | !P(C)),
+                    ////new CNFClause(Q(C) | !Q(C))
                 ]),
 
             // Unresolvable - Multiple trivially true resolvents (with variables..)
             new(
-                Clause1: new CNFClause(V(X, Y) | !V(Y, X)),
-                Clause2: new CNFClause(V(X, Y) | !V(Y, X)),
+                Clause1: new CNFClause(P(X, Y) | !P(Y, X)),
+                Clause2: new CNFClause(P(X, Y) | !P(Y, X)),
                 ExpectedResolvents:
                 [
                     // Both of these resolvents are trivially true - we expect them to not be returned
-                    ////new CNFClause(V(X, X) | !V(X, X)), // with {Y/X}
-                    ////new CNFClause(V(Y, Y) | !V(Y, Y)), // with {X/Y}
+                    ////new CNFClause(P(X, X) | !P(X, X)), // with {Y/X}
+                    ////new CNFClause(P(Y, Y) | !P(Y, Y)), // with {X/Y}
                 ]),
         ])
         .When(g => ClauseResolution.Resolve(g.Clause1, g.Clause2))

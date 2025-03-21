@@ -12,12 +12,12 @@ namespace SCFirstOrderLogic.Inference.Basic.KnowledgeBaseDecoration;
 public static class EqualityAxiomisingKnowledgeBaseTests
 {
     public static Test Smoke => TestThat
-        .GivenEachOf(() => new TestCase[]
-        {
+        .GivenEachOf<TestCase>(() =>
+        [
             new( // Unary predicate and function
                 Sentence: ForAll(X, IsMale(Father(X))),
-                ExpectedKnowledge: new Sentence[]
-                {
+                ExpectedKnowledge:
+                [
                     ForAll(X, AreEqual(X, X)), // Equality reflexivity
                     ForAll(X, Y, If(AreEqual(X, Y), AreEqual(Y, X))), // Equality commutativity
                     ForAll(X, Y, Z, If(And(AreEqual(X, Y), AreEqual(Y, Z)), AreEqual(X, Z))), // Equality transitivity
@@ -26,23 +26,23 @@ public static class EqualityAxiomisingKnowledgeBaseTests
 
                     ForAll(X, Y, If(AreEqual(X, Y), Iff(IsMale(X), IsMale(Y)))), // Equality and IsMale predicate
                     ForAll(X, Y, If(AreEqual(X, Y), AreEqual(Father(X), Father(Y)))), // Equality and Father function
-                }),
+                ]),
 
             new( // Ground predicate
                 Sentence: new Predicate("MyGroundPredicate"),
-                ExpectedKnowledge: new Sentence[]
-                {
+                ExpectedKnowledge:
+                [
                     ForAll(X, AreEqual(X, X)), // Equality reflexivity
                     ForAll(X, Y, If(AreEqual(X, Y), AreEqual(Y, X))), // Equality commutativity
                     ForAll(X, Y, Z, If(And(AreEqual(X, Y), AreEqual(Y, Z)), AreEqual(X, Z))), // Equality transitivity
 
                     new Predicate("MyGroundPredicate"), // Sentence that we told it
-                }),
+                ]),
 
             new( // (Unary predicate and) Ground function
                 Sentence: IsMale(new Function("MyGroundFunction")),
-                ExpectedKnowledge: new Sentence[]
-                {
+                ExpectedKnowledge:
+                [
                     ForAll(X, AreEqual(X, X)), // Equality reflexivity
                     ForAll(X, Y, If(AreEqual(X, Y), AreEqual(Y, X))), // Equality commutativity
                     ForAll(X, Y, Z, If(And(AreEqual(X, Y), AreEqual(Y, Z)), AreEqual(X, Z))), // Equality transitivity
@@ -50,8 +50,8 @@ public static class EqualityAxiomisingKnowledgeBaseTests
                     IsMale(new Function("MyGroundFunction")), // Sentence that we told it
 
                     ForAll(X, Y, If(AreEqual(X, Y), Iff(IsMale(X), IsMale(Y)))), // Equality and IsMale predicate
-                }),
-        })
+                ]),
+        ])
         .WhenAsync(async tc => await tc.KB.TellAsync(tc.Sentence))
         .ThenReturns()
         .And(tc =>

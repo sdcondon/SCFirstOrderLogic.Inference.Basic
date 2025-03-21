@@ -14,72 +14,72 @@ public static class BackwardChainingKnowledgeBaseTests
 {
     public static Test PositiveScenarios => TestThat
         .GivenTestContext()
-        .AndEachOf(() => new TestCase[]
-        {
+        .AndEachOf<TestCase>(() =>
+        [
             new(
                 Label: "Trivial",
                 Query: IsKing(John),
-                Knowledge: new Sentence[]
-                {
+                Knowledge:
+                [
                     IsKing(John)
-                }),
+                ]),
 
             new(
                 Label: "single conjunct, single step",
                 Query: IsEvil(John),
-                Knowledge: new Sentence[]
-                {
+                Knowledge:
+                [
                     IsGreedy(John),
                     AllGreedyAreEvil
-                }),
+                ]),
 
             new(
                 Label: "Two conjuncts, single step",
                 Query: IsEvil(John),
-                Knowledge: new Sentence[]
-                {
+                Knowledge:
+                [
                     IsGreedy(John),
                     IsKing(John),
                     AllGreedyKingsAreEvil
-                }),
+                ]),
 
             new(
                 Label: "Two applicable rules, each with two conjuncts, single step",
                 Query: IsEvil(X),
-                Knowledge: new Sentence[]
-                {
+                Knowledge:
+                [
                     IsKing(John),
                     IsGreedy(Mary),
                     IsQueen(Mary),
                     AllGreedyKingsAreEvil,
                     AllGreedyQueensAreEvil,
-                }),
+                ]),
 
             new(
                 Label: "Simple multiple possible substitutions",
                 Query: IsKing(X),
-                Knowledge: new Sentence[]
-                {
+                Knowledge:
+                [
                     IsKing(John),
                     IsKing(Richard),
-                }),
+                ]),
 
             new(
                 Label: "Uses same var twice in same proof",
                 Query: Knows(John, Mary),
-                Knowledge: new Sentence[]
-                {
+                Knowledge:
+                [
                     AllGreedyAreEvil,
                     AllEvilKnowEachOther,
                     IsGreedy(John),
                     IsGreedy(Mary),
-                }),
+                ]),
 
             new(
                 Label: "Crime example domain",
                 Query: IsCriminal(ColonelWest),
                 Knowledge: CrimeDomain.Axioms),
-        })
+        ])
         .When((_, tc) =>
         {
             var knowledgeBase = new BackwardChainingKnowledgeBase(new DictionaryClauseStore());
@@ -95,8 +95,8 @@ public static class BackwardChainingKnowledgeBaseTests
         .And((cxt, _, query) => cxt.WriteOutputLine(query.ResultExplanation));
 
     public static Test NegativeScenarios => TestThat
-        .GivenEachOf(() => new TestCase[]
-        {
+        .GivenEachOf<TestCase>(() =>
+        [
             new(
                 Label: "No matching clause",
                 Query: IsEvil(X),
@@ -124,7 +124,7 @@ public static class BackwardChainingKnowledgeBaseTests
                     IsGreedy(Richard),
                     AllGreedyKingsAreEvil,
                 ]),
-        })
+        ])
         .When(tc =>
         {
             var knowledgeBase = new BackwardChainingKnowledgeBase(new DictionaryClauseStore(tc.Knowledge));

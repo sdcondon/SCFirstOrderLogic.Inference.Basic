@@ -20,14 +20,14 @@ public static class ResolutionKnowledgeBaseTests
 {
     public static Test BasicPositiveScenarios => TestThat
         .GivenTestContext()
-        .AndEachOf(() => new StrategyFactory[]
-        {
+        .AndEachOf<StrategyFactory>(() =>
+        [
             new(DelegateStrategyWithHashSetClauseStore),
             new(DelegateStrategyWithFVIClauseStore),
             //new(LinearStrategy_WithFVIClauseStore),
-        })
-        .AndEachOf(() => new TestCase[]
-        {
+        ])
+        .AndEachOf<TestCase>(() =>
+        [
             new( // Trivial
                 Query: IsKing(John),
                 Knowledge:
@@ -80,7 +80,7 @@ public static class ResolutionKnowledgeBaseTests
                     IsGreedy(John),
                     IsGreedy(Mary),
                 ]),
-        })
+        ])
         .WhenAsync(MakeKBAndExecuteQueryAsync)
         .ThenReturns()
         .And((_, _, _, q) => q.Result.Should().BeTrue())

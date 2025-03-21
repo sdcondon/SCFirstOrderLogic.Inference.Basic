@@ -12,16 +12,16 @@ public static class FakeKnowledgeBaseTests
 {
     public static Test PositiveScenarios => TestThat
         .GivenTestContext()
-        .AndEachOf(() => new TestCase[]
-        {
+        .AndEachOf<TestCase>(() =>
+        [
             new(
                 Label: "Trivial",
                 Query: IsKing(John),
-                Knowledge: new Sentence[]
-                {
+                Knowledge:
+                [
                     IsKing(John)
-                })
-        })
+                ])
+        ])
         .When((_, tc) =>
         {
             var knowledgeBase = new FakeKnowledgeBase();
@@ -36,16 +36,16 @@ public static class FakeKnowledgeBaseTests
         .And((_, _, query) => query.Result.Should().BeTrue());
 
     public static Test NegativeScenarios => TestThat
-        .GivenEachOf(() => new TestCase[]
-        {
+        .GivenEachOf<TestCase>(() =>
+        [
             new(
                 Label: "single conjunct, single step",
                 Query: IsEvil(John),
-                Knowledge: new Sentence[]
-                {
+                Knowledge:
+                [
                     IsGreedy(John),
                     AllGreedyAreEvil
-                }),
+                ]),
 
             new(
                 Label: "No matching clause",
@@ -55,7 +55,7 @@ public static class FakeKnowledgeBaseTests
                     IsKing(John),
                     IsGreedy(John),
                 ]),
-        })
+        ])
         .When(tc =>
         {
             var knowledgeBase = new FakeKnowledgeBase();
