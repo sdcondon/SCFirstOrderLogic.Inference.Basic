@@ -5,7 +5,6 @@ using SCFirstOrderLogic.ExampleDomains.FromAIaMA.Chapter9.UsingSentenceFactory;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using static SCFirstOrderLogic.ExampleDomains.FromAIaMA.Chapter9.UsingSentenceFactory.CuriousityAndTheCatDomain;
 using static SCFirstOrderLogic.ExampleDomains.FromAIaMA.Chapter9.UsingSentenceFactory.CrimeDomain;
 
 namespace SCFirstOrderLogic.Inference.Basic.Resolution;
@@ -13,28 +12,62 @@ namespace SCFirstOrderLogic.Inference.Basic.Resolution;
 // TODO: not 100% fair - should factor KB initialisation out of benchmark, really.
 [MemoryDiagnoser]
 [InProcess]
-public class ResolutionKBBenchmarks
+public class ResolutionKBBenchmarks_Crime
 {
-    [Benchmark]
-    public static bool CrimeExample_ResolutionKB_FeatureVectorIndexClauseStore()
-    {
-        var kb = MakeResolutionKB(MakeFVIClauseStore());
-        AddCrimeDomainAxioms(kb);
+    private static readonly ResolutionKnowledgeBase withFviClauseStore = MakeResolutionKB(MakeFVIClauseStore());
+    private static readonly ResolutionKnowledgeBase withFviClauseStoreWrc = MakeResolutionKB_WithRemovalCheck(MakeFVIClauseStore());
+    private static readonly ResolutionKnowledgeBase withHSClauseStore = MakeResolutionKB(new HashSetClauseStore());
+    private static readonly ResolutionKB_WithoutClauseStore withoutClauseStore = MakeResolutionKB();
 
-        return kb.AskAsync(IsCriminal(ColonelWest)).GetAwaiter().GetResult();
+    [Benchmark]
+    public static async Task<bool> WithFVIClauseStore()
+    {
+        return await withFviClauseStore.AskAsync(IsCriminal(ColonelWest));
+    }
+
+    [Benchmark]
+    public static async Task<bool> WithFVIClauseStore_WithRemoveCheck()
+    {
+        return await withFviClauseStoreWrc.AskAsync(IsCriminal(ColonelWest));
     }
 
     [Benchmark(Baseline = true)]
-    public static bool CrimeExample_ResolutionKB_HashSetClauseStore()
+    public static async Task<bool> WithHSClauseStore()
     {
-        var kb = MakeResolutionKB(new HashSetClauseStore());
-        AddCrimeDomainAxioms(kb);
-
-        return kb.AskAsync(IsCriminal(ColonelWest)).GetAwaiter().GetResult();
+        return await withHSClauseStore.AskAsync(IsCriminal(ColonelWest));
     }
 
     [Benchmark]
-    public static bool CrimeExample_ResolutionKB_WithoutClauseStore()
+    public static bool WithoutClauseStore()
+    {
+        return withoutClauseStore.Ask(IsCriminal(ColonelWest));
+    }
+
+    private static ResolutionKnowledgeBase MakeResolutionKB(IKnowledgeBaseClauseStore clauseStore)
+    {
+        var kb = new ResolutionKnowledgeBase(new DelegateResolutionStrategy(
+            clauseStore,
+            DelegateResolutionStrategy.Filters.None,
+            DelegateResolutionStrategy.PriorityComparisons.UnitPreference));
+
+        kb.Tell(CrimeDomain.Axioms);
+
+        return kb;
+    }
+
+    private static ResolutionKnowledgeBase MakeResolutionKB_WithRemovalCheck(IKnowledgeBaseClauseStore clauseStore)
+    {
+        var kb = new ResolutionKnowledgeBase(new DelegateResolutionStrategy_WithRemovalCheck(
+            clauseStore,
+            DelegateResolutionStrategy.Filters.None,
+            DelegateResolutionStrategy.PriorityComparisons.UnitPreference));
+
+        kb.Tell(CrimeDomain.Axioms);
+
+        return kb;
+    }
+
+    private static ResolutionKB_WithoutClauseStore MakeResolutionKB()
     {
         var kb = new ResolutionKB_WithoutClauseStore(
             ResolutionKB_WithoutClauseStore.Filters.None,
@@ -45,56 +78,14 @@ public class ResolutionKBBenchmarks
             kb.Tell(axiom);
         }
 
-        return kb.Ask(IsCriminal(ColonelWest));
+        return kb;
     }
 
-    [Benchmark]
-    public static bool CuriousityExample_ResolutionKB_FeatureVectorIndexClauseStore()
-    {
-        var kb = MakeResolutionKB(MakeFVIClauseStore());
-        AddCuriousityDomainAxioms(kb);
-
-        return kb.AskAsync(Kills(Curiousity, Tuna)).GetAwaiter().GetResult();
-    }
-
-    [Benchmark]
-    public static bool CuriousityExample_ResolutionKB_HashSetClauseStore()
-    {
-        var kb = MakeResolutionKB(new HashSetClauseStore());
-        AddCuriousityDomainAxioms(kb);
-
-        return kb.AskAsync(Kills(Curiousity, Tuna)).GetAwaiter().GetResult();
-    }
-
-    public static IKnowledgeBase MakeResolutionKB(IKnowledgeBaseClauseStore clauseStore)
-    {
-        return new ResolutionKnowledgeBase(new DelegateResolutionStrategy(
-            clauseStore,
-            DelegateResolutionStrategy.Filters.None,
-            DelegateResolutionStrategy.PriorityComparisons.UnitPreference));
-    }
-
-    public static IKnowledgeBaseClauseStore MakeFVIClauseStore()
+    private static IKnowledgeBaseClauseStore MakeFVIClauseStore()
     {
         return new FeatureVectorIndexClauseStore<CloneableAFVIListNode<MaxDepthFeature, CNFClause>, MaxDepthFeature>(
             MaxDepthFeature.MakeFeatureVector,
             new CloneableAFVIListNode<MaxDepthFeature, CNFClause>(MaxDepthFeature.MakeFeatureComparer()));
-    }
-
-    public static void AddCrimeDomainAxioms(IKnowledgeBase knowledgeBase)
-    {
-        foreach (var axiom in CrimeDomain.Axioms)
-        {
-            knowledgeBase.Tell(axiom);
-        }
-    }
-
-    public static void AddCuriousityDomainAxioms(IKnowledgeBase knowledgeBase)
-    {
-        foreach (var axiom in CuriousityAndTheCatDomain.Axioms)
-        {
-            knowledgeBase.Tell(axiom);
-        }
     }
 
     private class CloneableAFVIListNode<TFeature, TValue> : IAsyncFeatureVectorIndexNode<TFeature, TValue>, ICloneable, IDisposable

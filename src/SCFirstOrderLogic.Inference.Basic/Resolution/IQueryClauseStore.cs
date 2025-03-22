@@ -21,6 +21,14 @@ public interface IQueryClauseStore : IAsyncEnumerable<CNFClause>, IDisposable
     Task<bool> AddAsync(CNFClause clause, CancellationToken cancellationToken = default);
 
     /// <summary>
+    /// Determines whether the clause store contains a specific clause.
+    /// </summary>
+    /// <param name="clause">The clause to locate.</param>
+    /// <param name="cancellationToken">A cancellation token for the operation.</param>
+    /// <returns>true if clause is found; otherwise, false.</returns>
+    Task<bool> ContainsAsync(CNFClause clause, CancellationToken cancellationToken = default);
+
+    /// <summary>
     /// <para>
     /// Returns all possible resolutions of a given clause with some clause in the store.
     /// </para>
