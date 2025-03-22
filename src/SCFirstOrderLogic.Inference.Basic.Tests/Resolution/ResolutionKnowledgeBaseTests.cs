@@ -4,6 +4,7 @@ using SCFirstOrderLogic.ClauseIndexing;
 using SCFirstOrderLogic.ClauseIndexing.Features;
 using SCFirstOrderLogic.ExampleDomains.FromAIaMA.Chapter8.UsingOperableSentenceFactory;
 using SCFirstOrderLogic.ExampleDomains.FromAIaMA.Chapter9.UsingOperableSentenceFactory;
+using SCFirstOrderLogic.Inference.Basic.KnowledgeBaseDecoration;
 using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
@@ -18,15 +19,15 @@ namespace SCFirstOrderLogic.Inference.Basic.Resolution;
 
 public static class ResolutionKnowledgeBaseTests
 {
-    public static Test BasicPositiveScenarios => TestThat
+    public static Test TrivialPositiveScenarios => TestThat
         .GivenTestContext()
-        .AndEachOf<StrategyFactory>(() =>
+        .AndEachOf<KBFactory>(() =>
         [
-            new(DelegateStrategyWithHashSetClauseStore),
-            new(DelegateStrategyWithFVIClauseStore),
-            //new(LinearStrategy_WithFVIClauseStore),
+            new(UnitPrefWithHSClauseStore),
+            new(UnitPrefWithFVIClauseStore),
+            //new(LinearWithFVIClauseStore),
         ])
-        .AndEachOf<TestCase>(() =>
+        .AndEachOf<KnowledgeAndQuery>(() =>
         [
             new( // Trivial
                 Query: IsKing(John),
@@ -83,18 +84,17 @@ public static class ResolutionKnowledgeBaseTests
         ])
         .WhenAsync(MakeKBAndExecuteQueryAsync)
         .ThenReturns()
-        .And((_, _, _, q) => q.Result.Should().BeTrue())
-        .And((cxt, _, _, q) => cxt.WriteOutput(q.ResultExplanation));
+        .And((_, _, _, q) => q.Result.Should().BeTrue());
 
-    public static Test BasicNegativeScenarios => TestThat
+    public static Test TrivialNegativeScenarios => TestThat
         .GivenTestContext()
-        .AndEachOf<StrategyFactory>(() =>
+        .AndEachOf<KBFactory>(() =>
         [
-            new(DelegateStrategyWithHashSetClauseStore),
-            new(DelegateStrategyWithFVIClauseStore),
-            //new(LinearStrategy_WithFVIClauseStore),
+            new(UnitPrefWithHSClauseStore),
+            new(UnitPrefWithFVIClauseStore),
+            //new(LinearWithFVIClauseStore),
         ])
-        .AndEachOf<TestCase>(() =>
+        .AndEachOf<KnowledgeAndQuery>(() =>
         [
             new( // No matching clause
                 Query: IsEvil(John),
@@ -125,15 +125,15 @@ public static class ResolutionKnowledgeBaseTests
         .ThenReturns()
         .And((_, _, _, q) => q.Result.Should().BeFalse());
 
-    public static Test ComplexPositiveScenarios => TestThat
+    public static Test SimplePositiveScenarios => TestThat
         .GivenTestContext()
-        .AndEachOf<StrategyFactory>(() =>
+        .AndEachOf<KBFactory>(() =>
         [
-            new(DelegateStrategyWithHashSetClauseStore),
-            new(DelegateStrategyWithFVIClauseStore),
+            new(UnitPrefWithHSClauseStore),
+            new(UnitPrefWithFVIClauseStore),
             //new(LinearStrategy_WithFVIClauseStore),
         ])
-        .AndEachOf<TestCase>(() =>
+        .AndEachOf<KnowledgeAndQuery>(() =>
         [
             new(
                 Query: IsCriminal(ColonelWest),
@@ -145,8 +145,7 @@ public static class ResolutionKnowledgeBaseTests
         ])
         .WhenAsync(MakeKBAndExecuteQueryAsync)
         .ThenReturns()
-        .And((_, _, _, q) => q.Result.Should().BeTrue())
-        .And((cxt, _, _, q) => cxt.WriteOutput(q.ResultExplanation));
+        .And((_, _, _, q) => q.Result.Should().BeTrue());
 
     // This is a difficult query. Would need more complex algo to deal with it
     // in a timely fashion. Better way of handling equality, better prioritisation, etc.
@@ -194,48 +193,83 @@ public static class ResolutionKnowledgeBaseTests
             (rv.task1.IsFaulted ^ rv.task2.IsFaulted).Should().BeTrue();
         });
 
-    private static IResolutionStrategy DelegateStrategyWithHashSetClauseStore() => new DelegateResolutionStrategy(
-        new HashSetClauseStore(),
-        DelegateResolutionStrategy.Filters.None,
-        DelegateResolutionStrategy.PriorityComparisons.UnitPreference);
+    private static ResolutionKnowledgeBase UnitPrefWithHSClauseStore()
+    {
+        return new ResolutionKnowledgeBase(new DelegateResolutionStrategy(
+            new HashSetClauseStore(),
+            DelegateResolutionStrategy.Filters.None,
+            DelegateResolutionStrategy.PriorityComparisons.UnitPreference));
+    }
 
-    private static IResolutionStrategy DelegateStrategyWithFVIClauseStore() => new DelegateResolutionStrategy(
-        new FeatureVectorIndexClauseStore<CloneableAFVIListNode<MaxDepthFeature, CNFClause>, MaxDepthFeature>(
+    private static ResolutionKnowledgeBase UnitPrefWithFVIClauseStore()
+    {
+        var clauseStore = new FeatureVectorIndexClauseStore<CloneableAFVIListNode<MaxDepthFeature, CNFClause>, MaxDepthFeature>(
             MaxDepthFeature.MakeFeatureVector,
-            new CloneableAFVIListNode<MaxDepthFeature, CNFClause>(MaxDepthFeature.MakeFeatureComparer())),
-        DelegateResolutionStrategy.Filters.None,
-        DelegateResolutionStrategy.PriorityComparisons.UnitPreference);
+            new CloneableAFVIListNode<MaxDepthFeature, CNFClause>(MaxDepthFeature.MakeFeatureComparer()));
 
-    ////private static IResolutionStrategy LinearStrategyWithFVIClauseStore() => new LinearResolutionStrategy(
+        return new ResolutionKnowledgeBase(new DelegateResolutionStrategy(
+            clauseStore,
+            DelegateResolutionStrategy.Filters.None,
+            DelegateResolutionStrategy.PriorityComparisons.UnitPreference));
+    }
+
+    ////private static async Task<IKnowledgeBase> UnitPrefAndEqualityAxiomsWithFVIClauseStore()
+    ////{
+    ////    var clauseStore = new FeatureVectorIndexClauseStore<CloneableAFVIListNode<MaxDepthFeature, CNFClause>, MaxDepthFeature>(
+    ////        MaxDepthFeature.MakeFeatureVector,
+    ////        new CloneableAFVIListNode<MaxDepthFeature, CNFClause>(MaxDepthFeature.MakeFeatureComparer()));
+
+    ////    var innerKb = new ResolutionKnowledgeBase(new DelegateResolutionStrategy(
+    ////        clauseStore,
+    ////        DelegateResolutionStrategy.Filters.None,
+    ////        DelegateResolutionStrategy.PriorityComparisons.UnitPreference));
+
+    ////    return await EqualityAxiomisingKnowledgeBase.CreateAsync(innerKb);
+    ////}
+
+    ////private static IResolutionStrategy LinearWithFVIClauseStore() => new LinearResolutionStrategy(
     ////    new FeatureVectorIndexClauseStore<CloneableAFVIListNode<MaxDepthFeature, CNFClause>, MaxDepthFeature>(
     ////        MaxDepthFeature.MakeFeatureVector,
     ////        new CloneableAFVIListNode<MaxDepthFeature, CNFClause>(MaxDepthFeature.MakeFeatureComparer())));
 
-    private static async Task<ResolutionQuery> MakeKBAndExecuteQueryAsync(ITestContext cxt, StrategyFactory sf, TestCase tc)
+    private static async Task<IQuery> MakeKBAndExecuteQueryAsync(ITestContext cxt, KBFactory kbf, KnowledgeAndQuery tc)
     {
-        var knowledgeBase = new ResolutionKnowledgeBase(sf.MakeStrategy());
+        var knowledgeBase = kbf.MakeKB();
         await knowledgeBase.TellAsync(tc.Knowledge);
         var query = await knowledgeBase.CreateQueryAsync(tc.Query);
 
-        var stepCount = 0;
-        while (!query.IsComplete)
+        if (query is ResolutionQuery resolutionQuery)
         {
-            await query.NextStepAsync();
-            stepCount++;
+            var stepCount = 0;
+            while (!resolutionQuery.IsComplete)
+            {
+                await resolutionQuery.NextStepAsync();
+                stepCount++;
+            }
+
+            cxt.WriteOutput($"Total steps: {stepCount}");
+
+            if (resolutionQuery.Result)
+            {
+                cxt.WriteOutput(resolutionQuery.ResultExplanation);
+            }
+        }
+        else
+        {
+            query.Execute();
         }
 
-        cxt.WriteOutput($"Total steps: {stepCount}");
         return query;
     }
 
-    private record StrategyFactory(
-        Func<IResolutionStrategy> MakeStrategy,
-        [CallerArgumentExpression(nameof(MakeStrategy))] string? MakeStrategyExpression = null)
+    private record KBFactory(
+        Func<IKnowledgeBase> MakeKB,
+        [CallerArgumentExpression(nameof(MakeKB))] string? MakeKBExpression = null)
     {
-        public override string ToString() => MakeStrategyExpression!;
+        public override string ToString() => MakeKBExpression!;
     }
 
-    private record TestCase(
+    private record KnowledgeAndQuery(
         Sentence Query,
         IEnumerable<Sentence> Knowledge,
         [CallerArgumentExpression(nameof(Knowledge))] string? KnowledgeExpression = null)

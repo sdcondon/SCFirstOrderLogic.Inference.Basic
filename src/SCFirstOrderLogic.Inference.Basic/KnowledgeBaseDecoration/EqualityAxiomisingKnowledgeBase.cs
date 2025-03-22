@@ -77,9 +77,9 @@ public class EqualityAxiomisingKnowledgeBase : IKnowledgeBase
 
     private class PredicateAndFunctionEqualityAxiomiser : RecursiveAsyncSentenceVisitor
     {
-        // nb: initially empty hash sets here are the real problem being referred to in the 
-        // nb#1 in the class summary. means that, in the external storage case, we'll be (trying to) 
-        // the the clause store stuff it already knows..
+        // nb: the initially empty hash sets here are the real problem being referred to in the 
+        // nb#1 in the class summary. this means that, in the external storage case, we'll be (trying to) 
+        // tell the clause store stuff it already knows..
         private readonly IKnowledgeBase innerKnowledgeBase;
         private readonly HashSet<object> knownPredicateIdentifiers = new() { EqualityIdentifier.Instance };
         private readonly HashSet<object> knownFunctionIdentifiers = new();

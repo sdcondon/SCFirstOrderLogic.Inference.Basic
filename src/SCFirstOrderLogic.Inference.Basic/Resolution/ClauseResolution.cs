@@ -51,8 +51,8 @@ public class ClauseResolution
     /// <returns>Zero or more results, each consisting of a unifier and output clause.</returns>
     // TODO-PERFORMANCE: Yes, this is a slow implementation - essentially because it does binary resolution.
     // It is simple, though - and thus will serve well as a baseline for improvements. Ultimately could
-    // look at adding a method to Unifier that accepts multiple literals and examines the tree for them
-    // all "simultaneously" - i.e. do full resolution, not binary.
+    // look at adding a method to Unifier in the core lib that accepts multiple literals and examines the
+    // tree for them all "simultaneously" - i.e. do full resolution, not binary.
     public static IEnumerable<ClauseResolution> Resolve(CNFClause clause1, CNFClause clause2)
     {
         foreach (var clause1Literal in clause1.Literals)
