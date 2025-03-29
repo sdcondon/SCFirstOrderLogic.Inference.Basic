@@ -12,7 +12,7 @@ namespace SCFirstOrderLogic.Inference.Basic.Resolution;
 
 /// <summary>
 /// An implementation of <see cref="IKnowledgeBaseClauseStore"/> that maintains all known clauses in
-/// a feature vector index.
+/// a <see cref="AsyncFeatureVectorIndex{TFeature}"/>.
 /// </summary>
 public class FeatureVectorIndexClauseStore<TNode, TFeature> : IKnowledgeBaseClauseStore
     where TNode : IAsyncFeatureVectorIndexNode<TFeature, CNFClause>, ICloneable, IDisposable

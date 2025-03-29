@@ -6,11 +6,9 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using static SCFirstOrderLogic.ExampleDomains.FromAIaMA.Chapter9.UsingSentenceFactory.CuriousityAndTheCatDomain;
-using static SCFirstOrderLogic.ExampleDomains.FromAIaMA.Chapter9.UsingSentenceFactory.CrimeDomain;
 
 namespace SCFirstOrderLogic.Inference.Basic.Resolution;
 
-// TODO: not 100% fair - should factor KB initialisation out of benchmark, really.
 [MemoryDiagnoser]
 [InProcess]
 public class ResolutionKBBenchmarks_Curiousity
@@ -41,8 +39,8 @@ public class ResolutionKBBenchmarks_Curiousity
     {
         var kb = new ResolutionKnowledgeBase(new DelegateResolutionStrategy(
             clauseStore,
-            DelegateResolutionStrategy.Filters.None,
-            DelegateResolutionStrategy.PriorityComparisons.UnitPreference));
+            ClauseResolutionFilters.None,
+            ClauseResolutionPriorityComparisons.UnitPreference));
 
         kb.Tell(CuriousityAndTheCatDomain.Axioms);
 
@@ -53,8 +51,8 @@ public class ResolutionKBBenchmarks_Curiousity
     {
         var kb = new ResolutionKnowledgeBase(new DelegateResolutionStrategy_WithRemovalCheck(
             clauseStore,
-            DelegateResolutionStrategy.Filters.None,
-            DelegateResolutionStrategy.PriorityComparisons.UnitPreference));
+            ClauseResolutionFilters.None,
+            ClauseResolutionPriorityComparisons.UnitPreference));
 
         kb.Tell(CuriousityAndTheCatDomain.Axioms);
 

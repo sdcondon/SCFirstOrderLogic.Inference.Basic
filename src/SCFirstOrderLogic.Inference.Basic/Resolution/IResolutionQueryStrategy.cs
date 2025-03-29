@@ -23,7 +23,8 @@ public interface IResolutionQueryStrategy : IDisposable
     ClauseResolution DequeueResolution();
 
     /// <summary>
-    /// Initialises the strategy by enqueuing the initial resolutions for a query. That is, enqueues all of the appropriate pairings of the clauses in the knowledge base and negation of the query sentence.
+    /// Initialises the strategy by enqueuing the initial resolutions for a query.
+    /// That is, enqueues all of the appropriate pairings of the clauses in the knowledge base and negation of the query sentence.
     /// </summary>
     /// <param name="cancellationToken">A cancellation token for the operation.</param>
     /// <returns>A task representing completion of the operation.</returns>
