@@ -6,7 +6,7 @@ using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace SCFirstOrderLogic.InternalUtilities;
+namespace SCFirstOrderLogic.Inference.Basic.InternalUtilities;
 
 /// <summary>
 /// <para>

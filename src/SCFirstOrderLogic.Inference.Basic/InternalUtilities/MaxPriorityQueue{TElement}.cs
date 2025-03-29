@@ -2,7 +2,7 @@
 // You may use this file in accordance with the terms of the MIT license.
 using System;
 
-namespace SCFirstOrderLogic.InternalUtilities;
+namespace SCFirstOrderLogic.Inference.Basic.InternalUtilities;
 
 /// <summary>
 /// A max priority queue implementation that uses a binary heap.
