@@ -1,12 +1,8 @@
-﻿#if false
-// Copyright (c) 2021-2024 Simon Condon.
+﻿// Copyright (c) 2021-2024 Simon Condon.
 // You may use this file in accordance with the terms of the MIT license.
 // NB: Not quite ready yet. In truth, I'm not completely sure that it's even trying to do the right thing.
 // It was created to prove out the strategy abstraction more than anything else.
-using System.Collections.Generic;
 using System.Runtime.CompilerServices;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace SCFirstOrderLogic.Inference.Basic.Resolution;
 
@@ -41,7 +37,10 @@ public class LinearResolutionStrategy : IResolutionStrategy
     private class QueryStrategy : IResolutionQueryStrategy
     {
         private readonly ResolutionQuery query;
-        private readonly Queue<ClauseResolution> queue = new(); // jus' a plain old queue for the mo. Not really good enough.
+
+        // jus' a plain old queue for the mo. Not really good enough.
+        // prob needs to be prioritised queue which also leverages subsumption.
+        private readonly Queue<ClauseResolution> queue = new();
         private readonly Task<IQueryClauseStore> clauseStoreCreation;
         private IQueryClauseStore? clauseStore;
 
@@ -72,7 +71,7 @@ public class LinearResolutionStrategy : IResolutionStrategy
             clauseStore = await clauseStoreCreation;
 
             // Initialise the query clause store with the clauses from the negation of the query:
-            foreach (var clause in query.NegatedQuery.Clauses)
+            foreach (var clause in query.NegatedQuerySentence.Clauses)
             {
                 await clauseStore.AddAsync(clause, cancellationToken);
             }
@@ -121,25 +120,24 @@ public class LinearResolutionStrategy : IResolutionStrategy
 
         private IEnumerable<CNFClause> GetAncestors(CNFClause clause)
         {
-            // TODO-PERFORMANCE-BREAKING: lots of dictionary lookups. could be avoided if our proof tree actually 
-            // had direct references to ancestors..
+            // TODO-PERFORMANCE-BREAKING: lots of dictionary lookups.
+            // Could be avoided if our proof tree actually had direct references to ancestors.
             if (query.Steps.TryGetValue(clause, out var resolution))
             {
                 yield return resolution.Clause1;
 
+                // TODO: performance - should only need to look at one of the clauses.
+                // the side clause will either be an input clause or another ancestor.
+                // requires consistent clause 
                 foreach (var ancestor in GetAncestors(resolution.Clause1))
                 {
                     yield return ancestor;
                 }
 
-                yield return resolution.Clause2;
-
-                foreach (var ancestor in GetAncestors(resolution.Clause2))
-                {
-                    yield return ancestor;
-                }
+                // NB: dont need to look at Clause2 - this is the side clause, and will
+                // be either an input clause (which we look at separately), or an ancestor 
+                // of Clause1.
             }
         }
     }
 }
-#endif

@@ -68,7 +68,7 @@ public class DelegateResolutionStrategy : IResolutionStrategy
     /// For context, see §9.5.6 ("Resolution Strategies") of 'Artifical Intelligence: A Modern Approach'.
     /// </para>
     /// </summary>
-    [Obsolete($"Use ClauseResolutionFilters instead")]
+    [Obsolete($"Use {nameof(ClauseResolutionFilters)} instead")]
     public static class Filters
     {
         /// <summary>
@@ -90,7 +90,7 @@ public class DelegateResolutionStrategy : IResolutionStrategy
     /// For context, see §9.5.6 ("Resolution Strategies") of 'Artifical Intelligence: A Modern Approach'.
     /// </para>
     /// </summary>
-    [Obsolete($"Use ClauseResolutionPriorityComparisons instead")]
+    [Obsolete($"Use {nameof(ClauseResolutionPriorityComparisons)} instead")]
     public static class PriorityComparisons
     {
         /// <summary>

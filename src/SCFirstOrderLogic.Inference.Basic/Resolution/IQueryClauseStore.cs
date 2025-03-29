@@ -39,6 +39,9 @@ public interface IQueryClauseStore : IAsyncEnumerable<CNFClause>, IDisposable
     /// </summary>
     /// <param name="clause">The clause to find resolutions for.</param>
     /// <param name="cancellationToken">Cancellation token for the operation.</param>
-    /// <returns>An enumerable of resolutions of the given clause with a clause in the store.</returns>
+    /// <returns>
+    /// An enumerable of resolutions of the given clause with a clause in the store.
+    /// In the returned resolutions, the given <see parammref="clause"/> should be <see cref="ClauseResolution.Clause1"/>.
+    /// </returns>
     IAsyncEnumerable<ClauseResolution> FindResolutions(CNFClause clause, CancellationToken cancellationToken = default);
 }

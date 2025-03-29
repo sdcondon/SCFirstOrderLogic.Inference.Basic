@@ -25,7 +25,7 @@ public static class ResolutionKnowledgeBaseTests
         [
             new(UnitPrefWithHSClauseStore),
             new(UnitPrefWithFVIClauseStore),
-            //new(LinearWithFVIClauseStore),
+            new(LinearWithFVIClauseStore),
         ])
         .AndEachOf<KnowledgeAndQuery>(() =>
         [
@@ -92,7 +92,7 @@ public static class ResolutionKnowledgeBaseTests
         [
             new(UnitPrefWithHSClauseStore),
             new(UnitPrefWithFVIClauseStore),
-            //new(LinearWithFVIClauseStore),
+            new(LinearWithFVIClauseStore),
         ])
         .AndEachOf<KnowledgeAndQuery>(() =>
         [
@@ -131,7 +131,7 @@ public static class ResolutionKnowledgeBaseTests
         [
             new(UnitPrefWithHSClauseStore),
             new(UnitPrefWithFVIClauseStore),
-            //new(LinearStrategy_WithFVIClauseStore),
+            new(LinearWithFVIClauseStore),
         ])
         .AndEachOf<KnowledgeAndQuery>(() =>
         [
@@ -170,8 +170,8 @@ public static class ResolutionKnowledgeBaseTests
         {
             var knowledgeBase = new ResolutionKnowledgeBase(new DelegateResolutionStrategy(
                 new HashSetClauseStore(),
-                DelegateResolutionStrategy.Filters.None,
-                DelegateResolutionStrategy.PriorityComparisons.UnitPreference));
+                ClauseResolutionFilters.None,
+                ClauseResolutionPriorityComparisons.UnitPreference));
 
             return knowledgeBase.CreateQuery(IsGreedy(John));
         })
@@ -197,8 +197,8 @@ public static class ResolutionKnowledgeBaseTests
     {
         return new ResolutionKnowledgeBase(new DelegateResolutionStrategy(
             new HashSetClauseStore(),
-            DelegateResolutionStrategy.Filters.None,
-            DelegateResolutionStrategy.PriorityComparisons.UnitPreference));
+            ClauseResolutionFilters.None,
+            ClauseResolutionPriorityComparisons.UnitPreference));
     }
 
     private static ResolutionKnowledgeBase UnitPrefWithFVIClauseStore()
@@ -209,8 +209,8 @@ public static class ResolutionKnowledgeBaseTests
 
         return new ResolutionKnowledgeBase(new DelegateResolutionStrategy(
             clauseStore,
-            DelegateResolutionStrategy.Filters.None,
-            DelegateResolutionStrategy.PriorityComparisons.UnitPreference));
+            ClauseResolutionFilters.None,
+            ClauseResolutionPriorityComparisons.UnitPreference));
     }
 
     ////private static async Task<IKnowledgeBase> UnitPrefAndEqualityAxiomsWithFVIClauseStore()
@@ -221,16 +221,21 @@ public static class ResolutionKnowledgeBaseTests
 
     ////    var innerKb = new ResolutionKnowledgeBase(new DelegateResolutionStrategy(
     ////        clauseStore,
-    ////        DelegateResolutionStrategy.Filters.None,
-    ////        DelegateResolutionStrategy.PriorityComparisons.UnitPreference));
+    ////        ClauseResolutionFilters.None,
+    ////        ClauseResolutionPriorityComparisons.UnitPreference));
 
     ////    return await EqualityAxiomisingKnowledgeBase.CreateAsync(innerKb);
     ////}
 
-    ////private static IResolutionStrategy LinearWithFVIClauseStore() => new LinearResolutionStrategy(
-    ////    new FeatureVectorIndexClauseStore<CloneableAFVIListNode<MaxDepthFeature, CNFClause>, MaxDepthFeature>(
-    ////        MaxDepthFeature.MakeFeatureVector,
-    ////        new CloneableAFVIListNode<MaxDepthFeature, CNFClause>(MaxDepthFeature.MakeFeatureComparer())));
+    private static ResolutionKnowledgeBase LinearWithFVIClauseStore()
+    {
+        var clauseStore = new FeatureVectorIndexClauseStore<CloneableAFVIListNode<MaxDepthFeature, CNFClause>, MaxDepthFeature>(
+            MaxDepthFeature.MakeFeatureVector,
+            new CloneableAFVIListNode<MaxDepthFeature, CNFClause>(MaxDepthFeature.MakeFeatureComparer()));
+
+        return new ResolutionKnowledgeBase(new LinearResolutionStrategy(
+            clauseStore));
+    }
 
     private static async Task<IQuery> MakeKBAndExecuteQueryAsync(ITestContext cxt, KBFactory kbf, KnowledgeAndQuery tc)
     {
@@ -251,6 +256,7 @@ public static class ResolutionKnowledgeBaseTests
 
             if (resolutionQuery.Result)
             {
+                cxt.WriteOutput(Environment.NewLine);
                 cxt.WriteOutput(resolutionQuery.ResultExplanation);
             }
         }
