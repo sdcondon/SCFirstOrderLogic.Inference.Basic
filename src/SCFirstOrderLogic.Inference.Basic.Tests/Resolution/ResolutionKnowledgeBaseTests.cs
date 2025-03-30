@@ -234,7 +234,8 @@ public static class ResolutionKnowledgeBaseTests
             new CloneableAFVIListNode<MaxDepthFeature, CNFClause>(MaxDepthFeature.MakeFeatureComparer()));
 
         return new ResolutionKnowledgeBase(new LinearResolutionStrategy(
-            clauseStore));
+            clauseStore,
+            ClauseResolutionPriorityComparisons.UnitPreference));
     }
 
     private static async Task<IQuery> MakeKBAndExecuteQueryAsync(ITestContext cxt, KBFactory kbf, KnowledgeAndQuery tc)
