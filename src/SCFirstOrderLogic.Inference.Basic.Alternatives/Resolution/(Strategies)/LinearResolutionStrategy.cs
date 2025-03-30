@@ -2,6 +2,7 @@
 // You may use this file in accordance with the terms of the MIT license.
 // NB: Not quite ready yet. In truth, I'm not completely sure that it's even trying to do the right thing.
 // It was created to prove out the strategy abstraction more than anything else.
+using SCFirstOrderLogic.Inference.Basic.InternalUtilities;
 using System.Runtime.CompilerServices;
 
 namespace SCFirstOrderLogic.Inference.Basic.Resolution;
@@ -12,14 +13,18 @@ namespace SCFirstOrderLogic.Inference.Basic.Resolution;
 public class LinearResolutionStrategy : IResolutionStrategy
 {
     private readonly IKnowledgeBaseClauseStore clauseStore;
+    private readonly Comparison<ClauseResolution> priorityComparison;
 
     /// <summary>
     /// Initialises a new instance of the <see cref="LinearResolutionStrategy"/> class.
     /// </summary>
     /// <param name="clauseStore">The clause store to use.</param>
-    public LinearResolutionStrategy(IKnowledgeBaseClauseStore clauseStore)
+    public LinearResolutionStrategy(
+        IKnowledgeBaseClauseStore clauseStore,
+        Comparison<ClauseResolution> priorityComparison)
     {
         this.clauseStore = clauseStore;
+        this.priorityComparison = priorityComparison;
     }
 
     /// <inheritdoc/>
@@ -29,28 +34,25 @@ public class LinearResolutionStrategy : IResolutionStrategy
     }
 
     /// <inheritdoc/>
-    public Task<IResolutionQueryStrategy> MakeQueryStrategyAsync(ResolutionQuery query, CancellationToken cancellationToken)
+    public async Task<IResolutionQueryStrategy> MakeQueryStrategyAsync(ResolutionQuery query, CancellationToken cancellationToken)
     {
-        return Task.FromResult((IResolutionQueryStrategy)new QueryStrategy(query, clauseStore, cancellationToken));
+        return new QueryStrategy(query, await clauseStore.CreateQueryStoreAsync(cancellationToken), priorityComparison);
     }
 
     private class QueryStrategy : IResolutionQueryStrategy
     {
         private readonly ResolutionQuery query;
-
-        // jus' a plain old queue for the mo. Not really good enough.
-        // prob needs to be prioritised queue which also leverages subsumption.
-        private readonly Queue<ClauseResolution> queue = new();
-        private readonly Task<IQueryClauseStore> clauseStoreCreation;
-        private IQueryClauseStore? clauseStore;
+        private readonly IQueryClauseStore clauseStore;
+        private readonly MaxPriorityQueue<ClauseResolution> queue;
 
         public QueryStrategy(
             ResolutionQuery query,
-            IKnowledgeBaseClauseStore kbClauseStore,
-            CancellationToken cancellationToken)
+            IQueryClauseStore clauseStore,
+            Comparison<ClauseResolution> priorityComparison)
         {
             this.query = query;
-            this.clauseStoreCreation = kbClauseStore.CreateQueryStoreAsync(cancellationToken);
+            this.clauseStore = clauseStore;
+            this.queue = new MaxPriorityQueue<ClauseResolution>(priorityComparison);
         }
 
         /// <inheritdoc />
@@ -68,8 +70,6 @@ public class LinearResolutionStrategy : IResolutionStrategy
         /// <inheritdoc />
         public async Task EnqueueInitialResolutionsAsync(CancellationToken cancellationToken)
         {
-            clauseStore = await clauseStoreCreation;
-
             // Initialise the query clause store with the clauses from the negation of the query:
             foreach (var clause in query.NegatedQuerySentence.Clauses)
             {
@@ -92,10 +92,17 @@ public class LinearResolutionStrategy : IResolutionStrategy
         /// <inheritdoc />
         public async Task EnqueueResolutionsAsync(CNFClause clause, CancellationToken cancellationToken)
         {
+            //// TODO-FUNC:
+            ////// Check if we've found a new clause (i.e. something that we didn't know already).
+            ////// Downside of using Add: clause store will encounter itself when looking for unifiers - not a big deal,
+            ////// but a performance/simplicity tradeoff nonetheless.
+            ////if (await clauseStore.AddAsync(clause, cancellationToken)) -- with callback for queue removal
+            ////{
             await foreach (var newResolution in FindResolutions(clause, cancellationToken))
             {
                 queue.Enqueue(newResolution);
             }
+            ////}
         }
 
         private async IAsyncEnumerable<ClauseResolution> FindResolutions(
@@ -103,6 +110,9 @@ public class LinearResolutionStrategy : IResolutionStrategy
             [EnumeratorCancellation] CancellationToken cancellationToken = default)
         {
             // Can resolve with clauses from the KB and negated query - which we use the inner clause store for
+            // TODO-FUNC: will need to change once we start adding intermediate clauses to the store (to leverage subsumption).
+            // cos need to filter to kb clauses - could do post-hoc by checking each returned value against the proof (either doesn't
+            // appear, or is an ancestor)? still lots of dictionary lookups, but would be a start..
             await foreach (var resolution in clauseStore!.FindResolutions(clause, cancellationToken))
             {
                 yield return resolution;
@@ -126,9 +136,6 @@ public class LinearResolutionStrategy : IResolutionStrategy
             {
                 yield return resolution.Clause1;
 
-                // TODO: performance - should only need to look at one of the clauses.
-                // the side clause will either be an input clause or another ancestor.
-                // requires consistent clause 
                 foreach (var ancestor in GetAncestors(resolution.Clause1))
                 {
                     yield return ancestor;
