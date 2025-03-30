@@ -21,6 +21,15 @@ public interface IQueryClauseStore : IAsyncEnumerable<CNFClause>, IDisposable
     Task<bool> AddAsync(CNFClause clause, CancellationToken cancellationToken = default);
 
     /// <summary>
+    /// Stores a clause if it is not already present.
+    /// </summary>
+    /// <param name="clause">The clause to store.</param>
+    /// <param name="clauseRemovedCallback">A delegate to be invoked for each clause removed from the store because it is subsumed by the added clause.</param>
+    /// <param name="cancellationToken">Cancellation token for the operation.</param>
+    /// <returns>True if the clause was added, false if it was already present.</returns>
+    Task<bool> AddAsync(CNFClause clause, Func<CNFClause, Task> clauseRemovedCallback, CancellationToken cancellationToken = default);
+
+    /// <summary>
     /// Determines whether the clause store contains a specific clause.
     /// </summary>
     /// <param name="clause">The clause to locate.</param>

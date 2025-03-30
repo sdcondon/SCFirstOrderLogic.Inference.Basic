@@ -86,6 +86,12 @@ public class FeatureVectorIndexClauseStore<TNode, TFeature> : IKnowledgeBaseClau
         }
 
         /// <inheritdoc />
+        public async Task<bool> AddAsync(CNFClause clause, Func<CNFClause, Task> removedClauseCallback, CancellationToken cancellationToken = default)
+        {
+            return await featureVectorIndex.TryReplaceSubsumedAsync(clause, removedClauseCallback);
+        }
+
+        /// <inheritdoc />
         public async Task<bool> ContainsAsync(CNFClause clause, CancellationToken cancellationToken = default)
         {
             return await featureVectorIndex.ContainsAsync(clause);

@@ -1,6 +1,7 @@
 ﻿// Copyright (c) 2021-2024 Simon Condon.
 // You may use this file in accordance with the terms of the MIT license.
 using SCFirstOrderLogic.SentenceManipulation.Normalisation;
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
@@ -89,6 +90,12 @@ public class HashSetClauseStore : IKnowledgeBaseClauseStore
 
         /// <inheritdoc />
         public Task<bool> AddAsync(CNFClause clause, CancellationToken cancellationToken = default)
+        {
+            return Task.FromResult(clauses.TryAdd(clause, 0));
+        }
+
+        /// <inheritdoc />
+        public Task<bool> AddAsync(CNFClause clause, Func<CNFClause, Task> removedClauseCallback, CancellationToken cancellationToken = default)
         {
             return Task.FromResult(clauses.TryAdd(clause, 0));
         }
