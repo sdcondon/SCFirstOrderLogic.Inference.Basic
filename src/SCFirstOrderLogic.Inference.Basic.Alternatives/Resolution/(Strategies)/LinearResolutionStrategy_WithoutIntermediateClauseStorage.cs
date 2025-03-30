@@ -3,13 +3,14 @@
 // NB: Not quite ready yet. In truth, I'm not completely sure that it's even trying to do the right thing.
 // It was created to prove out the strategy abstraction more than anything else.
 using SCFirstOrderLogic.Inference.Basic.InternalUtilities;
+using System.Runtime.CompilerServices;
 
 namespace SCFirstOrderLogic.Inference.Basic.Resolution;
 
 /// <summary>
 /// Resolution strategy that applies linear resolution.
 /// </summary>
-public class LinearResolutionStrategy : IResolutionStrategy
+public class LinearResolutionStrategy_WithoutIntermediateClauseStorage : IResolutionStrategy
 {
     private readonly IKnowledgeBaseClauseStore clauseStore;
     private readonly Comparison<ClauseResolution> priorityComparison;
@@ -18,7 +19,7 @@ public class LinearResolutionStrategy : IResolutionStrategy
     /// Initialises a new instance of the <see cref="LinearResolutionStrategy"/> class.
     /// </summary>
     /// <param name="clauseStore">The clause store to use.</param>
-    public LinearResolutionStrategy(
+    public LinearResolutionStrategy_WithoutIntermediateClauseStorage(
         IKnowledgeBaseClauseStore clauseStore,
         Comparison<ClauseResolution> priorityComparison)
     {
@@ -91,41 +92,43 @@ public class LinearResolutionStrategy : IResolutionStrategy
         /// <inheritdoc />
         public async Task EnqueueResolutionsAsync(CNFClause clause, CancellationToken cancellationToken)
         {
-            // Check if we've found a new clause (i.e. something that we didn't know already).
-            // Downside of using Add: clause store will encounter itself when looking for unifiers - not a big deal,
-            // but a performance/simplicity tradeoff nonetheless.
-            if (await clauseStore.AddAsync(clause, cancellationToken)) // TODO: with callback for removal - remove all appropriate resolutions from queue.
+            await foreach (var newResolution in FindResolutions(clause, cancellationToken))
             {
-                var ancestors = GetAncestors(clause);
+                queue.Enqueue(newResolution);
+            }
+        }
 
-                await foreach (var resolution in clauseStore.FindResolutions(clause, cancellationToken))
+        private async IAsyncEnumerable<ClauseResolution> FindResolutions(
+            CNFClause clause,
+            [EnumeratorCancellation] CancellationToken cancellationToken = default)
+        {
+            // Can resolve with clauses from the KB and negated query - which we use the inner clause store for
+            await foreach (var resolution in clauseStore!.FindResolutions(clause, cancellationToken))
+            {
+                yield return resolution;
+            }
+
+            // Can also resolve with ancestors of this clause in the proof tree as it stands:
+            foreach (var ancestorClause in GetAncestors(clause))
+            {
+                foreach (var resolution in ClauseResolution.Resolve(clause, ancestorClause))
                 {
-                    // Can resolve with input clauses (which won't have an entry in steps dictionary),
-                    // or with an ancestor. Performance could almost certainly be improved by specialised
-                    // clause store with more indexing, but can come back to that later perhaps.
-                    if (!query.Steps.ContainsKey(resolution.Clause2) || ancestors.Contains(resolution.Clause2))
-                    {
-                        queue.Enqueue(resolution);
-                    }
+                    yield return resolution;
                 }
             }
         }
 
-        private List<CNFClause> GetAncestors(CNFClause clause)
+        private IEnumerable<CNFClause> GetAncestors(CNFClause clause)
         {
-            var ancestors = new List<CNFClause>();
-
             // TODO-PERFORMANCE-BREAKING: lots of dictionary lookups.
             // Could be avoided if our proof tree actually had direct references to ancestors.
             while (query.Steps.TryGetValue(clause, out var resolution))
             {
-                // NB: only need to look at Clause1 - Clause2 is the side clause, and will
+                // NB: dont need to look at Clause2 - this is the side clause, and will
                 // be either an input clause (which we look at separately), or an ancestor 
                 // of Clause1.
-                ancestors.Add(clause = resolution.Clause1);
+                yield return clause = resolution.Clause1;
             }
-
-            return ancestors;
         }
     }
 }

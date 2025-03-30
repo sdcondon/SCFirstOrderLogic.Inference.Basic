@@ -108,7 +108,7 @@ public class FeatureVectorIndexClauseStore<TNode, TFeature> : IKnowledgeBaseClau
             CNFClause clause,
             [EnumeratorCancellation] CancellationToken cancellationToken = default)
         {
-            // todo: feels like we should be able to filter somehow - what's the relationship
+            // todo: feels like we should be able to filter somehow just using the FVI - what's the relationship
             // (if any) between *resolution* potential and feature vectors? think about/read up.
             await foreach (var otherClause in this.WithCancellation(cancellationToken))
             {

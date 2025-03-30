@@ -25,7 +25,8 @@ public static class ResolutionKnowledgeBaseTests
         [
             new(UnitPrefWithHSClauseStore),
             new(UnitPrefWithFVIClauseStore),
-            new(LinearWithFVIClauseStore),
+            //new(LinearWithFVIClauseStore),
+            new(LinearWithoutIntClauseStorage),
         ])
         .AndEachOf<KnowledgeAndQuery>(() =>
         [
@@ -92,7 +93,8 @@ public static class ResolutionKnowledgeBaseTests
         [
             new(UnitPrefWithHSClauseStore),
             new(UnitPrefWithFVIClauseStore),
-            new(LinearWithFVIClauseStore),
+            //new(LinearWithFVIClauseStore),
+            new(LinearWithoutIntClauseStorage),
         ])
         .AndEachOf<KnowledgeAndQuery>(() =>
         [
@@ -131,7 +133,8 @@ public static class ResolutionKnowledgeBaseTests
         [
             new(UnitPrefWithHSClauseStore),
             new(UnitPrefWithFVIClauseStore),
-            new(LinearWithFVIClauseStore),
+            //new(LinearWithFVIClauseStore),
+            new(LinearWithoutIntClauseStorage),
         ])
         .AndEachOf<KnowledgeAndQuery>(() =>
         [
@@ -213,6 +216,28 @@ public static class ResolutionKnowledgeBaseTests
             ClauseResolutionPriorityComparisons.UnitPreference));
     }
 
+    private static ResolutionKnowledgeBase LinearWithFVIClauseStore()
+    {
+        var clauseStore = new FeatureVectorIndexClauseStore<CloneableAFVIListNode<MaxDepthFeature, CNFClause>, MaxDepthFeature>(
+            MaxDepthFeature.MakeFeatureVector,
+            new CloneableAFVIListNode<MaxDepthFeature, CNFClause>(MaxDepthFeature.MakeFeatureComparer()));
+
+        return new ResolutionKnowledgeBase(new LinearResolutionStrategy(
+            clauseStore,
+            ClauseResolutionPriorityComparisons.UnitPreference));
+    }
+
+    private static ResolutionKnowledgeBase LinearWithoutIntClauseStorage()
+    {
+        var clauseStore = new FeatureVectorIndexClauseStore<CloneableAFVIListNode<MaxDepthFeature, CNFClause>, MaxDepthFeature>(
+            MaxDepthFeature.MakeFeatureVector,
+            new CloneableAFVIListNode<MaxDepthFeature, CNFClause>(MaxDepthFeature.MakeFeatureComparer()));
+
+        return new ResolutionKnowledgeBase(new LinearResolutionStrategy_WithoutIntermediateClauseStorage(
+            clauseStore,
+            ClauseResolutionPriorityComparisons.UnitPreference));
+    }
+
     ////private static async Task<IKnowledgeBase> UnitPrefAndEqualityAxiomsWithFVIClauseStore()
     ////{
     ////    var clauseStore = new FeatureVectorIndexClauseStore<CloneableAFVIListNode<MaxDepthFeature, CNFClause>, MaxDepthFeature>(
@@ -226,17 +251,6 @@ public static class ResolutionKnowledgeBaseTests
 
     ////    return await EqualityAxiomisingKnowledgeBase.CreateAsync(innerKb);
     ////}
-
-    private static ResolutionKnowledgeBase LinearWithFVIClauseStore()
-    {
-        var clauseStore = new FeatureVectorIndexClauseStore<CloneableAFVIListNode<MaxDepthFeature, CNFClause>, MaxDepthFeature>(
-            MaxDepthFeature.MakeFeatureVector,
-            new CloneableAFVIListNode<MaxDepthFeature, CNFClause>(MaxDepthFeature.MakeFeatureComparer()));
-
-        return new ResolutionKnowledgeBase(new LinearResolutionStrategy(
-            clauseStore,
-            ClauseResolutionPriorityComparisons.UnitPreference));
-    }
 
     private static async Task<IQuery> MakeKBAndExecuteQueryAsync(ITestContext cxt, KBFactory kbf, KnowledgeAndQuery tc)
     {
