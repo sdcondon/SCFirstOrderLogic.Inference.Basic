@@ -25,7 +25,8 @@ public static class ResolutionKnowledgeBaseTests
         [
             new(UnitPrefWithHSClauseStore),
             new(UnitPrefWithFVIClauseStore),
-            //new(LinearWithFVIClauseStore),
+            new(LinearWithHSClauseStore),
+            new(LinearWithFVIClauseStore),
             new(LinearWithoutIntClauseStorage),
         ])
         .AndEachOf<KnowledgeAndQuery>(() =>
@@ -93,7 +94,8 @@ public static class ResolutionKnowledgeBaseTests
         [
             new(UnitPrefWithHSClauseStore),
             new(UnitPrefWithFVIClauseStore),
-            //new(LinearWithFVIClauseStore),
+            new(LinearWithHSClauseStore),
+            new(LinearWithFVIClauseStore),
             new(LinearWithoutIntClauseStorage),
         ])
         .AndEachOf<KnowledgeAndQuery>(() =>
@@ -133,7 +135,8 @@ public static class ResolutionKnowledgeBaseTests
         [
             new(UnitPrefWithHSClauseStore),
             new(UnitPrefWithFVIClauseStore),
-            //new(LinearWithFVIClauseStore),
+            new(LinearWithHSClauseStore),
+            new(LinearWithFVIClauseStore),
             new(LinearWithoutIntClauseStorage),
         ])
         .AndEachOf<KnowledgeAndQuery>(() =>
@@ -213,6 +216,13 @@ public static class ResolutionKnowledgeBaseTests
         return new ResolutionKnowledgeBase(new DelegateResolutionStrategy(
             clauseStore,
             ClauseResolutionFilters.None,
+            ClauseResolutionPriorityComparisons.UnitPreference));
+    }
+
+    private static ResolutionKnowledgeBase LinearWithHSClauseStore()
+    {
+        return new ResolutionKnowledgeBase(new LinearResolutionStrategy(
+            new HashSetClauseStore(),
             ClauseResolutionPriorityComparisons.UnitPreference));
     }
 
