@@ -3,7 +3,10 @@
 // NB: Not quite ready yet. In truth, I'm not completely sure that it's even trying to do the right thing.
 // It was created to prove out the strategy abstraction more than anything else.
 using SCFirstOrderLogic.Inference.Basic.InternalUtilities;
-using System.Diagnostics;
+using System;
+using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace SCFirstOrderLogic.Inference.Basic.Resolution;
 
@@ -36,44 +39,43 @@ public class LinearResolutionStrategy : IResolutionStrategy
     /// <inheritdoc/>
     public async Task<IResolutionQueryStrategy> MakeQueryStrategyAsync(ResolutionQuery query, CancellationToken cancellationToken)
     {
-        return new QueryStrategy(query, await clauseStore.CreateQueryStoreAsync(cancellationToken), priorityComparison);
+        return new QueryStrategy(
+            query,
+            await clauseStore.CreateQueryStoreAsync(cancellationToken),
+            await clauseStore.CreateQueryStoreAsync(cancellationToken),
+            priorityComparison);
     }
 
     private class QueryStrategy : IResolutionQueryStrategy
     {
         private readonly ResolutionQuery query;
-        private readonly IQueryClauseStore clauseStore;
+        private readonly IQueryClauseStore inputClauseStore;
+        private readonly IQueryClauseStore intermediateClauseStore;
         private readonly MaxPriorityQueue<ClauseResolution> queue;
 
         public QueryStrategy(
             ResolutionQuery query,
-            IQueryClauseStore clauseStore,
+            IQueryClauseStore inputClauseStore,
+            IQueryClauseStore intermediateClauseStore,
             Comparison<ClauseResolution> priorityComparison)
         {
             this.query = query;
-            this.clauseStore = clauseStore;
+            this.inputClauseStore = inputClauseStore;
+            this.intermediateClauseStore = intermediateClauseStore;
             this.queue = new MaxPriorityQueue<ClauseResolution>(priorityComparison);
         }
 
         /// <inheritdoc />
-        public bool IsQueueEmpty => !HasNextEffectiveQueuedResolution();
+        public bool IsQueueEmpty => queue.Count == 0;
 
         /// <inheritdoc />
-        public ClauseResolution DequeueResolution()
-        {
-            // todo: allow for removals from queue instead - or just dont
-            if (!HasNextEffectiveQueuedResolution())
-            {
-                throw new InvalidOperationException("Resolutions exhausted!");
-            }
-
-            return queue.Dequeue();
-        }
+        public ClauseResolution DequeueResolution() => queue.Dequeue();
 
         /// <inheritdoc />
         public void Dispose()
         {
-            clauseStore?.Dispose();
+            inputClauseStore.Dispose();
+            intermediateClauseStore.Dispose();
         }
 
         /// <inheritdoc />
@@ -82,16 +84,17 @@ public class LinearResolutionStrategy : IResolutionStrategy
             // Initialise the query clause store with the clauses from the negation of the query:
             foreach (var clause in query.NegatedQuerySentence.Clauses)
             {
-                await clauseStore.AddAsync(clause, cancellationToken);
+                await inputClauseStore.AddAsync(clause, cancellationToken);
+                await intermediateClauseStore.AddAsync(clause, cancellationToken);
             }
 
             // Queue up initial clause pairings:
             // TODO-PERFORMANCE-MAJOR: potentially repeating a lot of work here - could cache the results of pairings
             // of KB clauses with each other. Or at least don't keep re-attempting ones that we know fail.
             // Is this in scope for this *basic* implementation?
-            await foreach (var clause in clauseStore)
+            await foreach (var clause in inputClauseStore)
             {
-                await foreach (var resolution in clauseStore.FindResolutions(clause, cancellationToken))
+                await foreach (var resolution in inputClauseStore.FindResolutions(clause, cancellationToken))
                 {
                     queue.Enqueue(resolution);
                 }
@@ -104,40 +107,22 @@ public class LinearResolutionStrategy : IResolutionStrategy
             // Check if we've found a new clause (i.e. something that we didn't know already).
             // Downside of using Add: clause store will encounter itself when looking for unifiers - not a big deal,
             // but a performance/simplicity tradeoff nonetheless.
-            if (await clauseStore.AddAsync(clause, ClauseRemovedCallback, cancellationToken)) // TODO: with callback for removal - remove all appropriate resolutions from queue.
+            if (await intermediateClauseStore.AddAsync(clause, cancellationToken)) // TODO: with callback for removal - remove all appropriate resolutions from queue.
             {
-                var ancestors = GetAncestors(clause);
-
-                await foreach (var resolution in clauseStore.FindResolutions(clause, cancellationToken))
+                // Can resolve with input clauses
+                await foreach (var resolution in inputClauseStore.FindResolutions(clause, cancellationToken))
                 {
-                    // Can resolve with input clauses (which won't have an entry in steps dictionary),
-                    // or with an ancestor. Performance could almost certainly be improved by specialised
-                    // clause store with more indexing, but can come back to that later perhaps.
-                    // todo-bug: theoretically possible to get a top clause that matches an input clause,
-                    // and thus have a step for an input clause. will ultimately want to approach this differently.
-                    // but lets get it vaguely working first
-                    if (!query.Steps.ContainsKey(resolution.Clause2) || ancestors.Contains(resolution.Clause2))
+                    queue.Enqueue(resolution);
+                }
+
+                // Can also resolve with ancestors of this clause in the proof tree as it stands:
+                foreach (var ancestorClause in GetAncestors(clause))
+                {
+                    foreach (var resolution in ClauseResolution.Resolve(clause, ancestorClause))
                     {
                         queue.Enqueue(resolution);
                     }
                 }
-            }
-
-           Task ClauseRemovedCallback(CNFClause clause)
-            {
-                if (!query.Steps.ContainsKey(clause))
-                {
-                    // todo-bug: I *think* this is the root of the problem, since another avenue of
-                    // query (i.e. diff top clause) might need it.. could replace, though
-                    // would give misleading steps. could use diff clause store per top clause?
-                    Debug.WriteLine($"Input clause subsumed: {clause}");
-                }
-                else
-                {
-                    Debug.WriteLine($"Clause subsumed: {clause}");
-                }
-
-                return Task.CompletedTask;
             }
         }
 
@@ -156,34 +141,6 @@ public class LinearResolutionStrategy : IResolutionStrategy
             }
 
             return ancestors;
-        }
-
-        // side-effect: consumes non-effective from queue. yeah, this is ugly code..
-        private bool HasNextEffectiveQueuedResolution()
-        {
-            do
-            {
-                if (queue.Count == 0)
-                {
-                    return false;
-                }
-
-                var nextResolution = queue.Peek();
-
-                // non-effective if either of the resolving clauses are no longer in the store (which will be because they are
-                // subsumed by another clause since added). Potentially more efficient to remove resolutions from the queue as
-                // the subsumed clauses are removed, but this would require more complexity in the queue itself to allow this.
-                // For now, this approach will do.
-                if (!clauseStore.ContainsAsync(nextResolution.Clause1).GetAwaiter().GetResult() || !clauseStore.ContainsAsync(nextResolution.Clause2).GetAwaiter().GetResult())
-                {
-                    queue.Dequeue(); // nb - no thread safety here, but that's fine for now at least
-                }
-                else
-                {
-                    return true;
-                }
-            }
-            while (true);
         }
     }
 }

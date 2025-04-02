@@ -16,7 +16,7 @@ public class LinearResolutionStrategy_WithoutIntermediateClauseStorage : IResolu
     private readonly Comparison<ClauseResolution> priorityComparison;
 
     /// <summary>
-    /// Initialises a new instance of the <see cref="LinearResolutionStrategy"/> class.
+    /// Initialises a new instance of the <see cref="LinearResolutionStrategy_WithoutIntermediateClauseStorage"/> class.
     /// </summary>
     /// <param name="clauseStore">The clause store to use.</param>
     public LinearResolutionStrategy_WithoutIntermediateClauseStorage(

@@ -97,7 +97,7 @@ public class ResolutionQuery : SteppableQuery<ClauseResolution>
         // TODO: of course, there's a problem here. With large KBs, this could be very large and take a long
         // time/lots of memory/etc. There's no real reason why we should have to wait around for it to be completely finished
         // before we get get cracking. Just need to check that its finished AND the queue is empty before we consider the
-        // query exhausted.
+        // query exhausted. Redesign me!
         await query.strategy!.EnqueueInitialResolutionsAsync(cancellationToken);
 
         if (query.strategy.IsQueueEmpty)
