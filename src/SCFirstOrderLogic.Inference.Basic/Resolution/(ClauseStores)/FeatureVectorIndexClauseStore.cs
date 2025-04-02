@@ -14,22 +14,21 @@ namespace SCFirstOrderLogic.Inference.Basic.Resolution;
 /// An implementation of <see cref="IKnowledgeBaseClauseStore"/> that maintains all known clauses in
 /// a <see cref="AsyncFeatureVectorIndex{TFeature}"/>.
 /// </summary>
-public class FeatureVectorIndexClauseStore<TNode, TFeature> : IKnowledgeBaseClauseStore
-    where TNode : IAsyncFeatureVectorIndexNode<TFeature, CNFClause>, ICloneable, IDisposable
+public class FeatureVectorIndexClauseStore<TFeature> : IKnowledgeBaseClauseStore
     where TFeature : notnull
 {
     private readonly Func<CNFClause, IEnumerable<FeatureVectorComponent<TFeature>>> featureVectorMaker;
-    private readonly TNode featureVectorIndexRoot;
+    private readonly IClauseStoreFVINode<TFeature> featureVectorIndexRoot;
     private readonly AsyncFeatureVectorIndex<TFeature> featureVectorIndex;
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="FeatureVectorIndexClauseStore{TNode, TFeature}"/> class.
+    /// Initializes a new instance of the <see cref="FeatureVectorIndexClauseStore{TFeature}"/> class.
     /// </summary>
     /// <param name="featureVectorMaker">Delegate that makes the feature vector for a given clause.</param>
     /// <param name="featureVectorIndexRoot">The root node to use for the feature vector index.</param>
     public FeatureVectorIndexClauseStore(
         Func<CNFClause, IEnumerable<FeatureVectorComponent<TFeature>>> featureVectorMaker,
-        TNode featureVectorIndexRoot)
+        IClauseStoreFVINode<TFeature> featureVectorIndexRoot)
     {
         this.featureVectorMaker = featureVectorMaker;
         this.featureVectorIndexRoot = featureVectorIndexRoot;
@@ -52,12 +51,11 @@ public class FeatureVectorIndexClauseStore<TNode, TFeature> : IKnowledgeBaseClau
     }
 
     /// <inheritdoc />
-    public Task<IQueryClauseStore> CreateQueryStoreAsync(CancellationToken cancellationToken = default)
+    public async Task<IQueryClauseStore> CreateQueryStoreAsync(CancellationToken cancellationToken = default)
     {
-        // TODO-BREAKING: icloneable -> something async? might need our own interface..
-        return Task.FromResult<IQueryClauseStore>(new QueryStore(
+        return new QueryStore(
             featureVectorMaker,
-            (TNode)featureVectorIndexRoot.Clone()));
+            await featureVectorIndexRoot.CopyAsync());
     }
 
     /// <summary>
@@ -65,12 +63,12 @@ public class FeatureVectorIndexClauseStore<TNode, TFeature> : IKnowledgeBaseClau
     /// </summary>
     private class QueryStore : IQueryClauseStore
     {
-        private readonly TNode featureVectorIndexRoot;
+        private readonly IClauseStoreFVINode<TFeature> featureVectorIndexRoot;
         private readonly AsyncFeatureVectorIndex<TFeature> featureVectorIndex;
 
         public QueryStore(
             Func<CNFClause, IEnumerable<FeatureVectorComponent<TFeature>>> featureVectorSelector,
-            TNode featureVectorIndexRoot)
+            IClauseStoreFVINode<TFeature> featureVectorIndexRoot)
         {
             this.featureVectorIndexRoot = featureVectorIndexRoot;
 
