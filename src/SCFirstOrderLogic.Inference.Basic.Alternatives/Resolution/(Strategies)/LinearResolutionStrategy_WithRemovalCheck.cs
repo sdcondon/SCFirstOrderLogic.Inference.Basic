@@ -3,7 +3,6 @@
 // NB: Not quite ready yet. In truth, I'm not completely sure that it's even trying to do the right thing.
 // It was created to prove out the strategy abstraction more than anything else.
 using SCFirstOrderLogic.Inference.Basic.InternalUtilities;
-using System.Diagnostics;
 
 namespace SCFirstOrderLogic.Inference.Basic.Resolution;
 
