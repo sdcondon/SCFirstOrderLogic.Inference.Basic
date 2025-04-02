@@ -1,4 +1,6 @@
-﻿using SCFirstOrderLogic.ClauseIndexing;
+﻿// Copyright (c) 2021-2025 Simon Condon.
+// You may use this file in accordance with the terms of the MIT license.
+using SCFirstOrderLogic.ClauseIndexing;
 using System;
 using System.Threading.Tasks;
 
