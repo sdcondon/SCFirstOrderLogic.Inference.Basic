@@ -67,13 +67,6 @@ public class DictionaryClauseStore : IClauseStore
     /// <inheritdoc />
     public async IAsyncEnumerator<CNFDefiniteClause> GetAsyncEnumerator(CancellationToken cancellationToken = default)
     {
-        // Ensure we complete asynchronously. Clause stores are the only async thing in queries, so if we don't
-        // yield back to the context anywhere in here, we run the risk of entire queries executing synchronously,
-        // which we probably never want given the potential for queries to go on for a long time. Yes, adds overhead,
-        // and this clause store implementation is only really intended as an example (see class summary), but we
-        // should probably at least try to behave "nicely".
-        await Task.Yield();
-
         foreach (var clauseList in clausesByConsequentPredicateId.Values)
         {
             foreach (var clause in clauseList.Keys)
@@ -92,13 +85,6 @@ public class DictionaryClauseStore : IClauseStore
     {
         if (clausesByConsequentPredicateId.TryGetValue(goal.Identifier, out var clausesWithThisGoal))
         {
-            // Ensure we complete asynchronously. Clause stores are the only async thing in queries, so if we don't
-            // yield back to the context anywhere in here, we run the risk of entire queries executing synchronously,
-            // which we probably never want given the potential for queries to go on for a long time. Yes, adds overhead,
-            // and this clause store implementation is only really intended as an example (see class summary), but we
-            // should probably at least try to behave "nicely".
-            await Task.Yield();
-
             foreach (var clause in clausesWithThisGoal.Keys)
             {
                 // TODO-CODE-STINK: restandardisation doesn't belong here - the need to restandardise is due to the algorithm we use.
