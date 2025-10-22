@@ -150,9 +150,13 @@ public class ResolutionQuery : SteppableQuery<ClauseResolution>
             explanation.AppendLine($"#{i:D2}: {formatter.Format(DiscoveredClauses[i])}");
             explanation.AppendLine($"     From {GetSource(resolution.Clause1)}: {formatter.Format(resolution.Clause1)}");
             explanation.AppendLine($"     And  {GetSource(resolution.Clause2)}: {formatter.Format(resolution.Clause2)} ");
-            explanation.Append("     Using   : {");
-            explanation.Append(string.Join(", ", resolution.Substitution.Bindings.Select(s => $"{formatter.Format(s.Key)}/{formatter.Format(s.Value)}")));
-            explanation.AppendLine("}");
+
+            if (resolution.Substitution.Bindings.Count > 0)
+            {
+                explanation.Append("     Using   : {");
+                explanation.Append(string.Join(", ", resolution.Substitution.Bindings.Select(s => $"{formatter.Format(s.Key)}/{formatter.Format(s.Value)}")));
+                explanation.AppendLine("}");
+            }
 
             foreach (var term in CNFInspector.FindNormalisationTerms(DiscoveredClauses[i], resolution.Clause1, resolution.Clause2))
             {

@@ -72,7 +72,11 @@ public class BackwardChainingQuery : IQuery
     {
         var resultExplanation = new StringBuilder();
 
-        for (int i = 0; i < Proofs.Count; i++)
+        if (Proofs.Count == 1)
+        {
+            resultExplanation.Append(Proofs[0].GetExplanation(sentenceFormatter));
+        }
+        else for (int i = 0; i < Proofs.Count; i++)
         {
             resultExplanation.AppendLine($"PROOF #{i + 1}:");
             resultExplanation.AppendLine();

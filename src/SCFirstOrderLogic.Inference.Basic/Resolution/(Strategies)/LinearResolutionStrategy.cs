@@ -22,6 +22,10 @@ public class LinearResolutionStrategy : IResolutionStrategy
     /// Initialises a new instance of the <see cref="LinearResolutionStrategy"/> class.
     /// </summary>
     /// <param name="clauseStore">The clause store to use.</param>
+    /// <param name="priorityComparison">
+    /// A delegate to use to compare the pairs of clauses to be queued for a resolution attempt.
+    /// See the <see cref="ClauseResolutionPriorityComparisons"/> class for some useful examples.
+    /// </param>
     public LinearResolutionStrategy(
         IKnowledgeBaseClauseStore clauseStore,
         Comparison<ClauseResolution> priorityComparison)
@@ -134,7 +138,7 @@ public class LinearResolutionStrategy : IResolutionStrategy
             // Could be avoided if our proof tree actually had direct references to ancestors.
             while (query.Steps.TryGetValue(clause, out var resolution))
             {
-                // NB: only need to look at Clause1 - Clause2 is the side clause, and will
+                // NB: only need to look at Clause1. Clause2 is the side clause, and will
                 // be either an input clause (which we look at separately), or an ancestor 
                 // of Clause1.
                 ancestors.Add(clause = resolution.Clause1);

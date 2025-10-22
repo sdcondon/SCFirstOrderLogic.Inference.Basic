@@ -24,19 +24,19 @@ public class DelegateResolutionStrategy : IResolutionStrategy
     private readonly IKnowledgeBaseClauseStore clauseStore;
     private readonly Func<ClauseResolution, bool> filter;
     private readonly Comparison<ClauseResolution> priorityComparison;
-    
+
     /// <summary>
     /// Initialises a new instance of the <see cref="DelegateResolutionStrategy"/> class.
     /// </summary>
     /// <param name="clauseStore">The clause store to use.</param>
     /// <param name="filter">
     /// A delegate to use to filter the pairs of clauses to be queued for a resolution attempt.
-    /// A true value indicates that the pair should be enqueued. See the <see cref="Filters"/>
-    /// inner class for some useful examples.
+    /// A true value indicates that the pair should be enqueued. See the <see cref="ClauseResolutionFilters"/>
+    /// class for some useful examples.
     /// </param>
     /// <param name="priorityComparison">
     /// A delegate to use to compare the pairs of clauses to be queued for a resolution attempt.
-    /// See the <see cref="PriorityComparisons"/> inner class for some useful examples.
+    /// See the <see cref="ClauseResolutionPriorityComparisons"/> class for some useful examples.
     /// </param>
     public DelegateResolutionStrategy(
         IKnowledgeBaseClauseStore clauseStore,
