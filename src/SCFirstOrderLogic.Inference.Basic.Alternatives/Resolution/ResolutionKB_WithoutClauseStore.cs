@@ -1,8 +1,8 @@
 ﻿// Copyright (c) 2021-2025 Simon Condon.
 // You may use this file in accordance with the terms of the MIT license.
 using SCFirstOrderLogic.Inference.Basic.InternalUtilities;
-using SCFirstOrderLogic.SentenceManipulation.Normalisation;
-using SCFirstOrderLogic.SentenceManipulation.VariableManipulation;
+using SCFirstOrderLogic.FormulaManipulation.Normalisation;
+using SCFirstOrderLogic.FormulaManipulation.Substitution;
 
 namespace SCFirstOrderLogic.Inference.Basic.Resolution;
 
@@ -12,7 +12,7 @@ namespace SCFirstOrderLogic.Inference.Basic.Resolution;
 /// </summary>
 public sealed class ResolutionKB_WithoutClauseStore
 {
-    private readonly List<CNFSentence> sentences = new(); // ..instead of a clause store
+    private readonly List<CNFFormula> sentences = new(); // ..instead of a clause store
     private readonly Func<(CNFClause, CNFClause), bool> clausePairFilter;
     private readonly Comparison<(CNFClause, CNFClause)> clausePairPriorityComparison;
 
@@ -32,17 +32,17 @@ public sealed class ResolutionKB_WithoutClauseStore
     }
 
     /// <inheritdoc />
-    public void Tell(Sentence sentence) => sentences.Add(sentence.ToCNF());
+    public void Tell(Formula sentence) => sentences.Add(sentence.ToCNF());
 
     /// <inheritdoc />
-    public bool Ask(Sentence sentence) => new Query(this, sentence).Complete();
+    public bool Ask(Formula sentence) => new Query(this, sentence).Complete();
 
     /// <summary>
     /// Creates an <see cref="IResolutionQuery"/> instance for fine-grained execution and examination of a query.
     /// </summary>
     /// <param name="sentence">The query sentence.</param>
     /// <returns>An <see cref="IResolutionQuery"/> instance that can be used to execute and examine the query.</returns>
-    public Query CreateQuery(Sentence sentence) => new(this, sentence);
+    public Query CreateQuery(Formula sentence) => new(this, sentence);
 
     public class Query
     {
@@ -53,7 +53,7 @@ public sealed class ResolutionKB_WithoutClauseStore
 
         private bool result;
 
-        public Query(ResolutionKB_WithoutClauseStore knowledgeBase, Sentence sentence)
+        public Query(ResolutionKB_WithoutClauseStore knowledgeBase, Formula sentence)
         {
             this.NegatedQuery = new Negation(sentence).ToCNF();
 
@@ -76,7 +76,7 @@ public sealed class ResolutionKB_WithoutClauseStore
             }
         }
 
-        public CNFSentence NegatedQuery { get; }
+        public CNFFormula NegatedQuery { get; }
 
         /// <inheritdoc/>
         public bool IsComplete { get; private set; } = false;

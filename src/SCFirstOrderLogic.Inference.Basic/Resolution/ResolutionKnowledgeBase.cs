@@ -1,6 +1,6 @@
 ﻿// Copyright (c) 2021-2025 Simon Condon.
 // You may use this file in accordance with the terms of the MIT license.
-using SCFirstOrderLogic.SentenceManipulation.Normalisation;
+using SCFirstOrderLogic.FormulaManipulation.Normalisation;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -25,7 +25,7 @@ public class ResolutionKnowledgeBase : IKnowledgeBase
     public ResolutionKnowledgeBase(IResolutionStrategy strategy) => this.strategy = strategy;
 
     /// <inheritdoc />
-    public async Task TellAsync(Sentence sentence, CancellationToken cancellationToken = default)
+    public async Task TellAsync(Formula sentence, CancellationToken cancellationToken = default)
     {
         foreach(var clause in sentence.ToCNF().Clauses)
         {
@@ -34,7 +34,7 @@ public class ResolutionKnowledgeBase : IKnowledgeBase
     }
 
     /// <inheritdoc />
-    async Task<IQuery> IKnowledgeBase.CreateQueryAsync(Sentence sentence, CancellationToken cancellationToken)
+    async Task<IQuery> IKnowledgeBase.CreateQueryAsync(Formula sentence, CancellationToken cancellationToken)
     {
         return await CreateQueryAsync(sentence, cancellationToken);
     }
@@ -45,7 +45,7 @@ public class ResolutionKnowledgeBase : IKnowledgeBase
     /// <param name="sentence">The query sentence.</param>
     /// <param name="cancellationToken">A cancellation token for the operation.</param>
     /// <returns>A task that returns an <see cref="ResolutionQuery"/> instance that can be used to execute the query and examine the details of the result.</returns>
-    public Task<ResolutionQuery> CreateQueryAsync(Sentence sentence, CancellationToken cancellationToken = default)
+    public Task<ResolutionQuery> CreateQueryAsync(Formula sentence, CancellationToken cancellationToken = default)
     {
         return ResolutionQuery.CreateAsync(sentence, strategy, cancellationToken);
     }
@@ -55,7 +55,7 @@ public class ResolutionKnowledgeBase : IKnowledgeBase
     /// </summary>
     /// <param name="sentence">The query sentence.</param>
     /// <returns>An <see cref="ResolutionQuery"/> instance that can be used to execute the query and examine the details of the result.</returns>
-    public ResolutionQuery CreateQuery(Sentence sentence)
+    public ResolutionQuery CreateQuery(Formula sentence)
     {
         return CreateQueryAsync(sentence).GetAwaiter().GetResult();
     }

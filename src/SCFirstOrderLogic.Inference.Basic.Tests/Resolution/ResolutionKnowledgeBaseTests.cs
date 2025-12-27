@@ -2,17 +2,17 @@
 using FlUnit;
 using SCFirstOrderLogic.ClauseIndexing;
 using SCFirstOrderLogic.ClauseIndexing.Features;
-using SCFirstOrderLogic.ExampleDomains.FromAIaMA.Chapter8.UsingOperableSentenceFactory;
-using SCFirstOrderLogic.ExampleDomains.FromAIaMA.Chapter9.UsingOperableSentenceFactory;
+using SCFirstOrderLogic.ExampleDomains.FromAIaMA.Chapter8.UsingOperableFormulaFactory;
+using SCFirstOrderLogic.ExampleDomains.FromAIaMA.Chapter9.UsingOperableFormulaFactory;
 using SCFirstOrderLogic.Inference.Basic.KnowledgeBaseDecoration;
 using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
-using static SCFirstOrderLogic.ExampleDomains.FromAIaMA.Chapter8.UsingOperableSentenceFactory.KinshipDomain;
-using static SCFirstOrderLogic.ExampleDomains.FromAIaMA.Chapter9.UsingOperableSentenceFactory.CrimeDomain;
-using static SCFirstOrderLogic.ExampleDomains.FromAIaMA.Chapter9.UsingOperableSentenceFactory.CuriousityAndTheCatDomain;
-using static SCFirstOrderLogic.SentenceCreation.OperableSentenceFactory;
+using static SCFirstOrderLogic.ExampleDomains.FromAIaMA.Chapter8.UsingOperableFormulaFactory.KinshipDomain;
+using static SCFirstOrderLogic.ExampleDomains.FromAIaMA.Chapter9.UsingOperableFormulaFactory.CrimeDomain;
+using static SCFirstOrderLogic.ExampleDomains.FromAIaMA.Chapter9.UsingOperableFormulaFactory.CuriousityAndTheCatDomain;
+using static SCFirstOrderLogic.FormulaCreation.OperableFormulaFactory;
 using static SCFirstOrderLogic.TestUtilities.GreedyKingsDomain;
 
 namespace SCFirstOrderLogic.Inference.Basic.Resolution;
@@ -301,8 +301,8 @@ public static class ResolutionKnowledgeBaseTests
     }
 
     private record KnowledgeAndQuery(
-        Sentence Query,
-        IEnumerable<Sentence> Knowledge,
+        Formula Query,
+        IEnumerable<Formula> Knowledge,
         [CallerArgumentExpression(nameof(Knowledge))] string? KnowledgeExpression = null)
     {
         public override string ToString() => $"given {KnowledgeExpression}, {Query}";

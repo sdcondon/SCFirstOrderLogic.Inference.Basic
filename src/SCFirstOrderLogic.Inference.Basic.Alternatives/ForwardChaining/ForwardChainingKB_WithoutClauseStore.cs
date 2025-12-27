@@ -1,8 +1,8 @@
 ﻿// Copyright (c) 2021-2025 Simon Condon.
 // You may use this file in accordance with the terms of the MIT license.
-using SCFirstOrderLogic.SentenceFormatting;
-using SCFirstOrderLogic.SentenceManipulation.Normalisation;
-using SCFirstOrderLogic.SentenceManipulation.VariableManipulation;
+using SCFirstOrderLogic.FormulaFormatting;
+using SCFirstOrderLogic.FormulaManipulation.Normalisation;
+using SCFirstOrderLogic.FormulaManipulation.Substitution;
 using System.Collections.ObjectModel;
 using System.Text;
 
@@ -23,7 +23,7 @@ public sealed class ForwardChainingKB_WithoutClauseStore : IKnowledgeBase
     private readonly List<CNFDefiniteClause> clauses = new ();
 
     /// <inheritdoc />
-    public Task TellAsync(Sentence sentence, CancellationToken cancellationToken = default)
+    public Task TellAsync(Formula sentence, CancellationToken cancellationToken = default)
     {
         // Normalize, then verify that the sentence consists only of definite clauses
         // before indexing ANY of them:
@@ -45,7 +45,7 @@ public sealed class ForwardChainingKB_WithoutClauseStore : IKnowledgeBase
     }
 
     /// <inheritdoc />
-    async Task<IQuery> IKnowledgeBase.CreateQueryAsync(Sentence sentence, CancellationToken cancellationToken)
+    async Task<IQuery> IKnowledgeBase.CreateQueryAsync(Formula sentence, CancellationToken cancellationToken)
     {
         return await CreateQueryAsync(sentence, cancellationToken);
     }
@@ -56,7 +56,7 @@ public sealed class ForwardChainingKB_WithoutClauseStore : IKnowledgeBase
     /// <param name="query">The query sentence.</param>
     /// <param name="cancellationToken">A cancellation token for the operation.</param>
     /// <returns>A task that returns an <see cref="ForwardChainingQuery"/> instance that can be used to execute the query and examine the details of the result.</returns>
-    public Task<Query> CreateQueryAsync(Sentence query, CancellationToken cancellationToken = default)
+    public Task<Query> CreateQueryAsync(Formula query, CancellationToken cancellationToken = default)
     {
         if (query is not Predicate p)
         {
@@ -77,7 +77,7 @@ public sealed class ForwardChainingKB_WithoutClauseStore : IKnowledgeBase
     /// </summary>
     /// <param name="query">The query sentence.</param>
     /// <returns>An <see cref="Query"/> instance that can be used to execute the query and examine the details of the result.</returns>
-    public Query CreateQuery(Sentence query)
+    public Query CreateQuery(Formula query)
     {
         return CreateQueryAsync(query).GetAwaiter().GetResult();
     }
@@ -120,7 +120,7 @@ public sealed class ForwardChainingKB_WithoutClauseStore : IKnowledgeBase
                     throw new InvalidOperationException("Explanation of a negative result (which could be massive) is not supported");
                 }
 
-                var formatter = new SentenceFormatter();
+                var formatter = new FormulaFormatter();
                 var cnfExplainer = new CNFExplainer(formatter);
 
                 // Now build the explanation string.

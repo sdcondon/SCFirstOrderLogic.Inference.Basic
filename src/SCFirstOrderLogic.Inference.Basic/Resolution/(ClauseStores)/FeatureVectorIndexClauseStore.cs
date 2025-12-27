@@ -41,7 +41,7 @@ public class FeatureVectorIndexClauseStore<TFeature> : IKnowledgeBaseClauseStore
     /// <inheritdoc />
     public async Task<bool> AddAsync(CNFClause clause, CancellationToken cancellationToken = default)
     {
-        return await featureVectorIndex.TryReplaceSubsumedAsync(clause);
+        return await featureVectorIndex.TryReplaceSubsumedAsync(clause, null, cancellationToken);
     }
 
     /// <inheritdoc />
@@ -80,19 +80,19 @@ public class FeatureVectorIndexClauseStore<TFeature> : IKnowledgeBaseClauseStore
         /// <inheritdoc />
         public async Task<bool> AddAsync(CNFClause clause, CancellationToken cancellationToken = default)
         {
-            return await featureVectorIndex.TryReplaceSubsumedAsync(clause);
+            return await featureVectorIndex.TryReplaceSubsumedAsync(clause, null, cancellationToken);
         }
 
         /// <inheritdoc />
         public async Task<bool> AddAsync(CNFClause clause, Func<CNFClause, Task> removedClauseCallback, CancellationToken cancellationToken = default)
         {
-            return await featureVectorIndex.TryReplaceSubsumedAsync(clause, removedClauseCallback);
+            return await featureVectorIndex.TryReplaceSubsumedAsync(clause, removedClauseCallback, cancellationToken);
         }
 
         /// <inheritdoc />
         public async Task<bool> ContainsAsync(CNFClause clause, CancellationToken cancellationToken = default)
         {
-            return await featureVectorIndex.ContainsAsync(clause);
+            return await featureVectorIndex.ContainsAsync(clause, cancellationToken);
         }
 
         /// <inheritdoc />

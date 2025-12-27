@@ -1,7 +1,7 @@
 ﻿// Copyright (c) 2021-2025 Simon Condon.
 // You may use this file in accordance with the terms of the MIT license.
-using SCFirstOrderLogic.SentenceManipulation.Normalisation;
-using SCFirstOrderLogic.SentenceManipulation.VariableManipulation;
+using SCFirstOrderLogic.FormulaManipulation.Normalisation;
+using SCFirstOrderLogic.FormulaManipulation.Substitution;
 
 namespace SCFirstOrderLogic.Inference.Basic.ForwardChaining;
 
@@ -15,7 +15,7 @@ public sealed class ForwardChainingKB_FromAIaMA : IKnowledgeBase
     private readonly List<CNFDefiniteClause> clauses = new ();
 
     /// <inheritdoc />
-    public Task TellAsync(Sentence sentence, CancellationToken cancellationToken = default)
+    public Task TellAsync(Formula sentence, CancellationToken cancellationToken = default)
     {
         // First things first - normalise the sentence. Yes, the book hasn't talked about CNF for first-order logic by this point,
         // but this accomplishes a few things nice and easily:
@@ -41,13 +41,13 @@ public sealed class ForwardChainingKB_FromAIaMA : IKnowledgeBase
     }
 
     /// <inheritdoc />
-    async Task<IQuery> IKnowledgeBase.CreateQueryAsync(Sentence sentence, CancellationToken cancellationToken)
+    async Task<IQuery> IKnowledgeBase.CreateQueryAsync(Formula sentence, CancellationToken cancellationToken)
     {
         return await CreateQueryAsync(sentence, cancellationToken);
     }
 
     /// <inheritdoc />
-    public Task<Query> CreateQueryAsync(Sentence query, CancellationToken cancellationToken = default)
+    public Task<Query> CreateQueryAsync(Formula query, CancellationToken cancellationToken = default)
     {
         if (query is not Predicate p)
         {

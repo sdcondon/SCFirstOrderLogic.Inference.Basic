@@ -3,7 +3,7 @@ using FlUnit;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using static SCFirstOrderLogic.SentenceCreation.OperableSentenceFactory;
+using static SCFirstOrderLogic.FormulaCreation.OperableFormulaFactory;
 using static SCFirstOrderLogic.TestUtilities.GreedyKingsDomain;
 
 namespace SCFirstOrderLogic.Inference.Basic.Fake;
@@ -91,7 +91,7 @@ public static class FakeKnowledgeBaseTests
             (rv.task1.IsFaulted ^ rv.task2.IsFaulted).Should().BeTrue();
         });
 
-    private record TestCase(string Label, Sentence Query, IEnumerable<Sentence> Knowledge)
+    private record TestCase(string Label, Formula Query, IEnumerable<Formula> Knowledge)
     {
         public override string ToString() => Label;
     }

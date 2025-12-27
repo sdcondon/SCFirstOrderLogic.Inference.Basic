@@ -1,7 +1,7 @@
 ﻿// Copyright (c) 2021-2025 Simon Condon.
 // You may use this file in accordance with the terms of the MIT license.
 using SCFirstOrderLogic.Inference.Basic.InternalUtilities;
-using SCFirstOrderLogic.SentenceFormatting;
+using SCFirstOrderLogic.FormulaFormatting;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -38,7 +38,7 @@ public class BackwardChainingQuery : IQuery
     /// <summary>
     /// Gets a human-readable explanation of the query result.
     /// </summary>
-    public string ResultExplanation => GetResultExplanation(new SentenceFormatter());
+    public string ResultExplanation => GetResultExplanation(new FormulaFormatter());
 
     /// <summary>
     /// Gets a list of proofs of the query.
@@ -65,10 +65,10 @@ public class BackwardChainingQuery : IQuery
     }
 
     /// <summary>
-    /// Gets a human-readable explanation of the query result, using a specified <see cref="SentenceFormatter"/> instance.
+    /// Gets a human-readable explanation of the query result, using a specified <see cref="FormulaFormatter"/> instance.
     /// </summary>
     /// <param name="sentenceFormatter">The sentence formatter to use.</param>
-    public string GetResultExplanation(SentenceFormatter sentenceFormatter)
+    public string GetResultExplanation(FormulaFormatter sentenceFormatter)
     {
         var resultExplanation = new StringBuilder();
 

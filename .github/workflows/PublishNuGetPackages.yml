@@ -7,6 +7,9 @@ on:
 jobs:
   build-and-publish:
     runs-on: windows-latest
+    permissions:
+      contents: write
+      actions: write
 
     steps:
     - name: Checkout

@@ -1,7 +1,7 @@
 ﻿// Copyright (c) 2021-2025 Simon Condon.
 // You may use this file in accordance with the terms of the MIT license.
-using SCFirstOrderLogic.SentenceManipulation.Normalisation;
-using SCFirstOrderLogic.SentenceManipulation.VariableManipulation;
+using SCFirstOrderLogic.FormulaManipulation.Normalisation;
+using SCFirstOrderLogic.FormulaManipulation.Substitution;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -37,7 +37,7 @@ public class DictionaryClauseStore : IClauseStore
     /// </para>
     /// </summary>
     /// <param name="sentences">The initial content of the store.</param>
-    public DictionaryClauseStore(IEnumerable<Sentence> sentences)
+    public DictionaryClauseStore(IEnumerable<Formula> sentences)
     {
         foreach (var sentence in sentences)
         {
@@ -81,7 +81,7 @@ public class DictionaryClauseStore : IClauseStore
     public async IAsyncEnumerable<(CNFDefiniteClause Clause, VariableSubstitution Substitution)> GetClauseApplications(
         Predicate goal,
         VariableSubstitution constraints,
-        [EnumeratorCancellation] CancellationToken cancellationToken = default)
+        [EnumeratorCancellation]CancellationToken cancellationToken = default)
     {
         if (clausesByConsequentPredicateId.TryGetValue(goal.Identifier, out var clausesWithThisGoal))
         {

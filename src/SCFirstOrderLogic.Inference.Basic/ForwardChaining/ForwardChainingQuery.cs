@@ -1,9 +1,9 @@
 ﻿// Copyright (c) 2021-2025 Simon Condon.
 // You may use this file in accordance with the terms of the MIT license.
 using SCFirstOrderLogic.Inference.Basic.InternalUtilities;
-using SCFirstOrderLogic.SentenceFormatting;
-using SCFirstOrderLogic.SentenceManipulation.Normalisation;
-using SCFirstOrderLogic.SentenceManipulation.VariableManipulation;
+using SCFirstOrderLogic.FormulaFormatting;
+using SCFirstOrderLogic.FormulaManipulation.Normalisation;
+using SCFirstOrderLogic.FormulaManipulation.Substitution;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -44,7 +44,7 @@ public sealed class ForwardChainingQuery : IQuery
     /// <summary>
     /// Gets a (very raw, English) explanation of the steps that led to the result of the query.
     /// </summary>
-    public string ResultExplanation => GetResultExplanation(new SentenceFormatter());
+    public string ResultExplanation => GetResultExplanation(new FormulaFormatter());
 
     /// <summary>
     /// Gets the proof tree generated during execution of the query. Each discovered fact (not including those from the knowledge
@@ -137,10 +137,10 @@ public sealed class ForwardChainingQuery : IQuery
     }
 
     /// <summary>
-    /// Gets a (very raw, English) explanation of the steps that led to the result of the query, using a specified <see cref="SentenceFormatter"/>.
+    /// Gets a (very raw, English) explanation of the steps that led to the result of the query, using a specified <see cref="FormulaFormatter"/>.
     /// </summary>
     /// <param name="formatter">The sentence formatter to use.</param>
-    public string GetResultExplanation(SentenceFormatter formatter)
+    public string GetResultExplanation(FormulaFormatter formatter)
     {
         if (!IsComplete)
         {

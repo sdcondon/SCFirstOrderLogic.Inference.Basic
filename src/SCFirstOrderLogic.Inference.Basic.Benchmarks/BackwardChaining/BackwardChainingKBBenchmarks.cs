@@ -1,7 +1,7 @@
 ﻿using BenchmarkDotNet.Attributes;
-using SCFirstOrderLogic.ExampleDomains.FromAIaMA.Chapter9.UsingSentenceFactory;
+using SCFirstOrderLogic.ExampleDomains.FromAIaMA.Chapter9.UsingFormulaFactory;
 using SCFirstOrderLogic.Inference;
-using static SCFirstOrderLogic.ExampleDomains.FromAIaMA.Chapter9.UsingSentenceFactory.CrimeDomain;
+using static SCFirstOrderLogic.ExampleDomains.FromAIaMA.Chapter9.UsingFormulaFactory.CrimeDomain;
 
 namespace SCFirstOrderLogic.Inference.Basic.BackwardChaining;
 

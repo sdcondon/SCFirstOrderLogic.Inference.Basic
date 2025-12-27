@@ -4,8 +4,8 @@ using SCFirstOrderLogic.TestUtilities;
 using System.Collections.ObjectModel;
 using System.Threading;
 using System.Threading.Tasks;
-using static SCFirstOrderLogic.ExampleDomains.FromAIaMA.Chapter8.UsingSentenceFactory.KinshipDomain;
-using static SCFirstOrderLogic.SentenceCreation.SentenceFactory;
+using static SCFirstOrderLogic.ExampleDomains.FromAIaMA.Chapter8.UsingFormulaFactory.KinshipDomain;
+using static SCFirstOrderLogic.FormulaCreation.FormulaFactory;
 
 namespace SCFirstOrderLogic.Inference.Basic.KnowledgeBaseDecoration;
 
@@ -38,15 +38,15 @@ public static class UniqueNamesAxiomisingKnowledgeBaseTests
 
     private class MockKnowledgeBase : IKnowledgeBase
     {
-        public Collection<Sentence> Sentences { get; } = new Collection<Sentence>();
+        public Collection<Formula> Sentences { get; } = [];
 
-        public Task TellAsync(Sentence sentence, CancellationToken cancellationToken = default)
+        public Task TellAsync(Formula sentence, CancellationToken cancellationToken = default)
         {
             Sentences.Add(sentence);
             return Task.CompletedTask;
         }
 
-        public Task<IQuery> CreateQueryAsync(Sentence query, CancellationToken cancellationToken = default)
+        public Task<IQuery> CreateQueryAsync(Formula query, CancellationToken cancellationToken = default)
         {
             throw new System.NotImplementedException();
         }

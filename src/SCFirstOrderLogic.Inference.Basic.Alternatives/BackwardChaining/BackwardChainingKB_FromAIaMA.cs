@@ -1,8 +1,8 @@
 ﻿// Copyright (c) 2021-2025 Simon Condon.
 // You may use this file in accordance with the terms of the MIT license.
-using SCFirstOrderLogic.SentenceFormatting;
-using SCFirstOrderLogic.SentenceManipulation.Normalisation;
-using SCFirstOrderLogic.SentenceManipulation.VariableManipulation;
+using SCFirstOrderLogic.FormulaFormatting;
+using SCFirstOrderLogic.FormulaManipulation.Normalisation;
+using SCFirstOrderLogic.FormulaManipulation.Substitution;
 using System.Text;
 
 namespace SCFirstOrderLogic.Inference.Basic.BackwardChaining;
@@ -16,7 +16,7 @@ public class BackwardChainingKB_FromAIaMA : IKnowledgeBase
     private readonly Dictionary<object, List<CNFClause>> clausesByConsequentPredicateId = new();
 
     /// <inheritdoc />
-    public Task TellAsync(Sentence sentence, CancellationToken cancellationToken = default)
+    public Task TellAsync(Formula sentence, CancellationToken cancellationToken = default)
     {
         // First things first - normalise the sentence. Yes, the book hasn't talked about CNF for first-order logic by this point,
         // but this accomplishes a few things nice and easily:
@@ -48,13 +48,13 @@ public class BackwardChainingKB_FromAIaMA : IKnowledgeBase
     }
 
     /// <inheritdoc />
-    async Task<IQuery> IKnowledgeBase.CreateQueryAsync(Sentence sentence, CancellationToken cancellationToken)
+    async Task<IQuery> IKnowledgeBase.CreateQueryAsync(Formula sentence, CancellationToken cancellationToken)
     {
         return await CreateQueryAsync(sentence, cancellationToken);
     }
 
     /// <inheritdoc />
-    public Task<Query> CreateQueryAsync(Sentence query, CancellationToken cancellationToken = default)
+    public Task<Query> CreateQueryAsync(Formula query, CancellationToken cancellationToken = default)
     {
         if (query is not Predicate p)
         {
@@ -100,7 +100,7 @@ public class BackwardChainingKB_FromAIaMA : IKnowledgeBase
         {
             get
             {
-                var formatter = new SentenceFormatter();
+                var formatter = new FormulaFormatter();
                 var stringBuilder = new StringBuilder();
 
                 foreach (var substitution in Substitutions)

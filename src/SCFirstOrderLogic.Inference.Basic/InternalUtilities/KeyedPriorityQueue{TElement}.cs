@@ -2,6 +2,7 @@
 // You may use this file in accordance with the terms of the MIT license.
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 
 namespace SCFirstOrderLogic.Inference.Basic.InternalUtilities;
 
@@ -11,6 +12,7 @@ namespace SCFirstOrderLogic.Inference.Basic.InternalUtilities;
 /// <typeparam name="TElement">The type of objects to be stored.</typeparam>
 /// <typeparam name="TPriority">The type used to determine object priority.</typeparam>
 internal sealed class KeyedPriorityQueue<TElement, TPriority>
+    where TElement : notnull
 {
     private readonly IDictionary<TElement, int> indicesByElement;
     private readonly IComparer<TPriority> priorityComparer;
@@ -149,7 +151,7 @@ internal sealed class KeyedPriorityQueue<TElement, TPriority>
     /// <returns>
     /// true if the queue contains an element with the specified key; otherwise, false.
     /// </returns>
-    public bool TryGetPriority(TElement element, out TPriority priority)
+    public bool TryGetPriority(TElement element, [MaybeNullWhen(false)]out TPriority priority)
     {
         if (indicesByElement.TryGetValue(element, out var index))
         {

@@ -1,7 +1,7 @@
 ﻿// Copyright (c) 2021-2025 Simon Condon.
 // You may use this file in accordance with the terms of the MIT license.
-using SCFirstOrderLogic.SentenceFormatting;
-using SCFirstOrderLogic.SentenceManipulation.Normalisation;
+using SCFirstOrderLogic.FormulaFormatting;
+using SCFirstOrderLogic.FormulaManipulation.Normalisation;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -23,10 +23,9 @@ public class ResolutionQuery : SteppableQuery<ClauseResolution>
     private readonly Lazy<ReadOnlyCollection<CNFClause>> discoveredClauses;
 
     private IResolutionQueryStrategy? strategy;
-    private bool? result;
 
     private ResolutionQuery(
-        Sentence querySentence,
+        Formula querySentence,
         IResolutionStrategy strategy,
         CancellationToken cancellationToken)
     {
@@ -39,29 +38,12 @@ public class ResolutionQuery : SteppableQuery<ClauseResolution>
     /// <summary>
     /// Gets the (CNF representation of the) negation of the query sentence.
     /// </summary>
-    public CNFSentence NegatedQuerySentence { get; }
+    public CNFFormula NegatedQuerySentence { get; }
     
-    /// <inheritdoc/>
-    public override bool IsComplete => result.HasValue;
-
-    /// <inheritdoc/>
-    public override bool Result
-    {
-        get
-        {
-            if (!result.HasValue)
-            {
-                throw new InvalidOperationException("Query is not yet complete");
-            }
-
-            return result.Value;
-        }
-    }
-
     /// <summary>
     /// Gets a (very raw) explanation of the steps that led to the result of the query.
     /// </summary>
-    public string ResultExplanation => GetResultExplanation(new SentenceFormatter());
+    public string ResultExplanation => GetResultExplanation(new FormulaFormatter());
 
     /// <summary>
     /// Gets a list of the (useful) clauses discovered by a query that has returned a positive result.
@@ -85,7 +67,7 @@ public class ResolutionQuery : SteppableQuery<ClauseResolution>
     /// <param name="cancellationToken">The cancellation token for this operation.</param>
     /// <returns>A new query instance.</returns>
     public static async Task<ResolutionQuery> CreateAsync(
-        Sentence querySentence,
+        Formula querySentence,
         IResolutionStrategy strategy,
         CancellationToken cancellationToken = default)
     {
@@ -102,17 +84,17 @@ public class ResolutionQuery : SteppableQuery<ClauseResolution>
 
         if (query.strategy.IsQueueEmpty)
         {
-            query.result = false;
+            query.SetResult(false);
         }
 
         return query;
     }
 
     /// <summary>
-    /// Gets a human-readable explanation of the query result, using a specified <see cref="SentenceFormatter"/> instance.
+    /// Gets a human-readable explanation of the query result, using a specified <see cref="FormulaFormatter"/> instance.
     /// </summary>
     /// <param name="formatter">The sentence formatter to use.</param>
-    public string GetResultExplanation(SentenceFormatter formatter)
+    public string GetResultExplanation(FormulaFormatter formatter)
     {
         if (!IsComplete)
         {
@@ -187,7 +169,7 @@ public class ResolutionQuery : SteppableQuery<ClauseResolution>
         {
             if (resolution.Resolvent.Equals(CNFClause.Empty))
             {
-                result = true;
+                SetResult(true);
                 return resolution;
             }
 
@@ -196,7 +178,7 @@ public class ResolutionQuery : SteppableQuery<ClauseResolution>
 
         if (strategy.IsQueueEmpty)
         {
-            result = false;
+            SetResult(false);
         }
 
         return resolution;

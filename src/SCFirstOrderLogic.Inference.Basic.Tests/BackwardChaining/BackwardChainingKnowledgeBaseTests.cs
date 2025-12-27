@@ -1,11 +1,11 @@
 ﻿using FluentAssertions;
 using FlUnit;
-using SCFirstOrderLogic.ExampleDomains.FromAIaMA.Chapter9.UsingSentenceFactory;
+using SCFirstOrderLogic.ExampleDomains.FromAIaMA.Chapter9.UsingFormulaFactory;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using static SCFirstOrderLogic.ExampleDomains.FromAIaMA.Chapter9.UsingSentenceFactory.CrimeDomain;
-using static SCFirstOrderLogic.SentenceCreation.OperableSentenceFactory;
+using static SCFirstOrderLogic.ExampleDomains.FromAIaMA.Chapter9.UsingFormulaFactory.CrimeDomain;
+using static SCFirstOrderLogic.FormulaCreation.OperableFormulaFactory;
 using static SCFirstOrderLogic.TestUtilities.GreedyKingsDomain;
 
 namespace SCFirstOrderLogic.Inference.Basic.BackwardChaining;
@@ -160,7 +160,7 @@ public static class BackwardChainingKnowledgeBaseTests
             (rv.task1.IsFaulted ^ rv.task2.IsFaulted).Should().BeTrue();
         });
 
-    private record TestCase(string Label, Sentence Query, IEnumerable<Sentence> Knowledge)
+    private record TestCase(string Label, Formula Query, IEnumerable<Formula> Knowledge)
     {
         public override string ToString() => Label;
     }

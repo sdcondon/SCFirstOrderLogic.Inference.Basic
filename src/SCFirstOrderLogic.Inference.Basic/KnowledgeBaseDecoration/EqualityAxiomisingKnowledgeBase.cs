@@ -1,11 +1,11 @@
 ﻿// Copyright (c) 2021-2025 Simon Condon.
 // You may use this file in accordance with the terms of the MIT license.
-using SCFirstOrderLogic.SentenceManipulation;
+using SCFirstOrderLogic.FormulaManipulation;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using static SCFirstOrderLogic.SentenceCreation.SentenceFactory;
+using static SCFirstOrderLogic.FormulaCreation.FormulaFactory;
 
 namespace SCFirstOrderLogic.Inference.Basic.KnowledgeBaseDecoration;
 
@@ -15,16 +15,17 @@ namespace SCFirstOrderLogic.Inference.Basic.KnowledgeBaseDecoration;
 /// </para>
 /// <para>
 /// NB #1: works only as knowledge is *added* - knowledge already in the inner knowledge base at the time of instantiation
-/// will NOT be examined for functions and predicates to add equality rules for. This limitation is ultimately because IKnowledgeBase
-/// offers no way to enumerate known facts - and adding this would be a bad idea. A decorator clause store for each of the inference
-/// algorithms (which absolutely can be enumerated) would be another way to go - but this has its own problems. Consumers to whom this
-/// matters are invited to examine the source code and implement whatever they need based on it.
-/// TODO-EXTENSIBILITY: look again at doing this at the clause store level.
+/// will NOT be examined for functions and predicates to add equality rules for. This makes this type poor from a performance perspective when
+/// using external storage for clauses (since it'll be consistently trying to add stuff to the clause store that's already there). This limitation
+/// is ultimately because IKnowledgeBase offers no way to enumerate known facts - and adding this would be a bad idea. A decorator clause store for
+/// each of the inference algorithms (which absolutely can be enumerated) would be another way to go - but this has its own problems. Consumers to
+/// whom this matters are invited to examine the source code and implement whatever they need based on it.
 /// </para>
 /// <para>
 /// NB #2: See §9.5.5 ("Equality") of Artifical Intelligence: A Modern Approach for more on dealing with equality by axiomising it.
 /// </para>
 /// </summary>
+// TODO-EXTENSIBILITY: look again at doing this at the clause store level. OR just add injectible dependencies for known identifier repositories.
 public class EqualityAxiomisingKnowledgeBase : IKnowledgeBase
 {
     private readonly IKnowledgeBase innerKnowledgeBase;
@@ -63,19 +64,19 @@ public class EqualityAxiomisingKnowledgeBase : IKnowledgeBase
     }
 
     /// <inheritdoc/>
-    public async Task TellAsync(Sentence sentence, CancellationToken cancellationToken = default)
+    public async Task TellAsync(Formula sentence, CancellationToken cancellationToken = default)
     {
         await innerKnowledgeBase.TellAsync(sentence, cancellationToken);
-        await predicateAndFunctionEqualityAxiomiser.VisitAsync(sentence);
+        await predicateAndFunctionEqualityAxiomiser.VisitAsync(sentence, cancellationToken);
     }
 
     /// <inheritdoc/>
-    public Task<IQuery> CreateQueryAsync(Sentence query, CancellationToken cancellationToken = default)
+    public Task<IQuery> CreateQueryAsync(Formula query, CancellationToken cancellationToken = default)
     {
         return innerKnowledgeBase.CreateQueryAsync(query, cancellationToken);
     }
 
-    private class PredicateAndFunctionEqualityAxiomiser : RecursiveAsyncSentenceVisitor
+    private class PredicateAndFunctionEqualityAxiomiser : RecursiveAsyncFormulaVisitor
     {
         // nb: the initially empty hash sets here are the real problem being referred to in the 
         // nb#1 in the class summary. this means that, in the external storage case, we'll be (trying to) 
@@ -89,7 +90,7 @@ public class EqualityAxiomisingKnowledgeBase : IKnowledgeBase
             this.innerKnowledgeBase = innerKnowledgeBase;
         }
 
-        public override async Task VisitAsync(Predicate predicate)
+        public override async Task VisitAsync(Predicate predicate, CancellationToken cancellationToken = default)
         {
             // NB: we check only for the identifier, not for the identifier with the particular
             // argument count. A fairly safe assumption that we could nevertheless eliminate at some point.
@@ -106,25 +107,25 @@ public class EqualityAxiomisingKnowledgeBase : IKnowledgeBase
                 var rightArgs = predicate.Arguments.Select((_, i) => new VariableReference($"r{i}")).ToArray();
                 var consequent = Iff(new Predicate(predicate.Identifier, leftArgs), new Predicate(predicate.Identifier, rightArgs));
 
-                Sentence antecedent = AreEqual(leftArgs[0], rightArgs[0]);
+                Formula antecedent = AreEqual(leftArgs[0], rightArgs[0]);
                 for (int i = 1; i < predicate.Arguments.Count; i++)
                 {
                     antecedent = And(AreEqual(leftArgs[i], rightArgs[i]), antecedent);
                 }
 
-                Sentence sentence = ForAll(leftArgs[0].Declaration, ForAll(rightArgs[0].Declaration, If(antecedent, consequent)));
+                Formula sentence = ForAll(leftArgs[0].Declaration, ForAll(rightArgs[0].Declaration, If(antecedent, consequent)));
                 for (int i = 1; i < predicate.Arguments.Count; i++)
                 {
                     sentence = ForAll(leftArgs[i].Declaration, ForAll(rightArgs[i].Declaration, sentence));
                 }
 
-                await innerKnowledgeBase.TellAsync(sentence);
+                await innerKnowledgeBase.TellAsync(sentence, cancellationToken);
             }
 
-            await base.VisitAsync(predicate);
+            await base.VisitAsync(predicate, cancellationToken);
         }
 
-        public override async Task VisitAsync(Function function)
+        public override async Task VisitAsync(Function function, CancellationToken cancellationToken = default)
         {
             // NB: we check only for the identifier, not for the identifier with the particular
             // argument count. A fairly safe assumption that we could nevertheless eliminate at some point.
@@ -141,22 +142,22 @@ public class EqualityAxiomisingKnowledgeBase : IKnowledgeBase
                 var rightArgs = function.Arguments.Select((_, i) => new VariableReference($"r{i}")).ToArray();
                 var consequent = AreEqual(new Function(function.Identifier, leftArgs), new Function(function.Identifier, rightArgs));
 
-                Sentence antecedent = AreEqual(leftArgs[0], rightArgs[0]);
+                Formula antecedent = AreEqual(leftArgs[0], rightArgs[0]);
                 for (int i = 1; i < function.Arguments.Count; i++)
                 {
                     antecedent = new Conjunction(AreEqual(leftArgs[i], rightArgs[i]), antecedent);
                 }
 
-                Sentence sentence = ForAll(leftArgs[0].Declaration, ForAll(rightArgs[0].Declaration, If(antecedent, consequent)));
+                Formula sentence = ForAll(leftArgs[0].Declaration, ForAll(rightArgs[0].Declaration, If(antecedent, consequent)));
                 for (int i = 1; i < function.Arguments.Count; i++)
                 {
                     sentence = ForAll(leftArgs[i].Declaration, ForAll(rightArgs[i].Declaration, sentence));
                 }
 
-                await innerKnowledgeBase.TellAsync(sentence);
+                await innerKnowledgeBase.TellAsync(sentence, cancellationToken);
             }
 
-            await base.VisitAsync(function);
+            await base.VisitAsync(function, cancellationToken);
         }
     }
 }

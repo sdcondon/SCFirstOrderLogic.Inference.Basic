@@ -1,8 +1,8 @@
 ﻿// Copyright (c) 2021-2025 Simon Condon.
 // You may use this file in accordance with the terms of the MIT license.
-using SCFirstOrderLogic.SentenceFormatting;
-using SCFirstOrderLogic.SentenceManipulation.Normalisation;
-using SCFirstOrderLogic.SentenceManipulation.VariableManipulation;
+using SCFirstOrderLogic.FormulaFormatting;
+using SCFirstOrderLogic.FormulaManipulation.Normalisation;
+using SCFirstOrderLogic.FormulaManipulation.Substitution;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -49,7 +49,7 @@ public class BackwardChainingProof
     /// Gets a human-readable (English) explanation of the proof.
     /// </summary>
     /// <param name="formatter">The sentence formatter to use.</param>
-    public string GetExplanation(SentenceFormatter formatter)
+    public string GetExplanation(FormulaFormatter formatter)
     {
         var explanationBuilder = new StringBuilder();
 

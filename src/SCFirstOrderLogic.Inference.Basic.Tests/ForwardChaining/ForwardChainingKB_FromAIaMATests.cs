@@ -2,8 +2,8 @@
 using FlUnit;
 using SCFirstOrderLogic.Inference;
 using System.Collections.Generic;
-using static SCFirstOrderLogic.ExampleDomains.FromAIaMA.Chapter9.UsingSentenceFactory.CrimeDomain;
-using static SCFirstOrderLogic.SentenceCreation.OperableSentenceFactory;
+using static SCFirstOrderLogic.ExampleDomains.FromAIaMA.Chapter9.UsingFormulaFactory.CrimeDomain;
+using static SCFirstOrderLogic.FormulaCreation.OperableFormulaFactory;
 using static SCFirstOrderLogic.TestUtilities.GreedyKingsDomain;
 
 namespace SCFirstOrderLogic.Inference.Basic.ForwardChaining;
@@ -123,7 +123,7 @@ public static class ForwardChainingKB_FromAIaMATests
         .And((_, rv) => rv.Should().BeFalse())
         .And((query, _) => query.Result.Should().BeFalse());
 
-    private static ForwardChainingKB_FromAIaMA.Query MakeQuery(Sentence query, IEnumerable<Sentence> kb)
+    private static ForwardChainingKB_FromAIaMA.Query MakeQuery(Formula query, IEnumerable<Formula> kb)
     {
         var knowledgeBase = new ForwardChainingKB_FromAIaMA();
         knowledgeBase.Tell(kb);

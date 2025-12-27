@@ -1,11 +1,11 @@
 ﻿using BenchmarkDotNet.Attributes;
 using SCFirstOrderLogic.ClauseIndexing;
 using SCFirstOrderLogic.ClauseIndexing.Features;
-using SCFirstOrderLogic.ExampleDomains.FromAIaMA.Chapter9.UsingSentenceFactory;
+using SCFirstOrderLogic.ExampleDomains.FromAIaMA.Chapter9.UsingFormulaFactory;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using static SCFirstOrderLogic.ExampleDomains.FromAIaMA.Chapter9.UsingSentenceFactory.CuriousityAndTheCatDomain;
+using static SCFirstOrderLogic.ExampleDomains.FromAIaMA.Chapter9.UsingFormulaFactory.CuriousityAndTheCatDomain;
 
 namespace SCFirstOrderLogic.Inference.Basic.Resolution;
 

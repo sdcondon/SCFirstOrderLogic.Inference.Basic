@@ -1,10 +1,10 @@
 ﻿using FluentAssertions;
 using FlUnit;
-using SCFirstOrderLogic.ExampleDomains.FromAIaMA.Chapter9.UsingSentenceFactory;
+using SCFirstOrderLogic.ExampleDomains.FromAIaMA.Chapter9.UsingFormulaFactory;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using static SCFirstOrderLogic.ExampleDomains.FromAIaMA.Chapter9.UsingSentenceFactory.CrimeDomain;
-using static SCFirstOrderLogic.SentenceCreation.OperableSentenceFactory;
+using static SCFirstOrderLogic.ExampleDomains.FromAIaMA.Chapter9.UsingFormulaFactory.CrimeDomain;
+using static SCFirstOrderLogic.FormulaCreation.OperableFormulaFactory;
 using static SCFirstOrderLogic.TestUtilities.GreedyKingsDomain;
 
 namespace SCFirstOrderLogic.Inference.Basic.BackwardChaining;
@@ -121,7 +121,7 @@ public static class BackwardChainingKB_WithoutClauseStoreTests
         .And((_, rv) => rv.Should().BeFalse())
         .And((query, _) => query.Result.Should().BeFalse());
 
-    private static async Task<BackwardChainingKB_WithoutClauseStore.Query> MakeQueryAsync(Sentence query, IEnumerable<Sentence> kb)
+    private static async Task<BackwardChainingKB_WithoutClauseStore.Query> MakeQueryAsync(Formula query, IEnumerable<Formula> kb)
     {
         var knowledgeBase = new BackwardChainingKB_WithoutClauseStore();
         knowledgeBase.Tell(kb);

@@ -1,7 +1,7 @@
 ﻿// Copyright (c) 2021-2025 Simon Condon.
 // You may use this file in accordance with the terms of the MIT license.
-using SCFirstOrderLogic.SentenceManipulation.Normalisation;
-using SCFirstOrderLogic.SentenceManipulation.VariableManipulation;
+using SCFirstOrderLogic.FormulaManipulation.Normalisation;
+using SCFirstOrderLogic.FormulaManipulation.Substitution;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,13 +16,13 @@ namespace SCFirstOrderLogic.Inference.Basic.Fake;
 /// </summary>
 public class FakeQuery : IQuery
 {
-    private readonly CNFSentence queryGoal;
+    private readonly CNFFormula queryGoal;
     private readonly List<CNFClause> clauseStore;
 
     private int executeCount = 0;
     private bool result;
 
-    internal FakeQuery(Sentence queryGoal, List<CNFClause> clauseStore)
+    internal FakeQuery(Formula queryGoal, List<CNFClause> clauseStore)
     {
         this.queryGoal = queryGoal.ToCNF();
         this.clauseStore = clauseStore;

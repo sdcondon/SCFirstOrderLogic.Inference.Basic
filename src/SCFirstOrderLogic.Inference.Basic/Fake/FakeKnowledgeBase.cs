@@ -1,6 +1,6 @@
 ﻿// Copyright (c) 2021-2025 Simon Condon.
 // You may use this file in accordance with the terms of the MIT license.
-using SCFirstOrderLogic.SentenceManipulation.Normalisation;
+using SCFirstOrderLogic.FormulaManipulation.Normalisation;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
@@ -17,7 +17,7 @@ public class FakeKnowledgeBase : IKnowledgeBase
     private readonly List<CNFClause> clauseStore = new();
 
     /// <inheritdoc />
-    public Task TellAsync(Sentence sentence, CancellationToken cancellationToken = default)
+    public Task TellAsync(Formula sentence, CancellationToken cancellationToken = default)
     {
         foreach (var clause in sentence.ToCNF().Clauses)
         {
@@ -28,7 +28,7 @@ public class FakeKnowledgeBase : IKnowledgeBase
     }
 
     /// <inheritdoc />
-    async Task<IQuery> IKnowledgeBase.CreateQueryAsync(Sentence sentence, CancellationToken cancellationToken)
+    async Task<IQuery> IKnowledgeBase.CreateQueryAsync(Formula sentence, CancellationToken cancellationToken)
     {
         return await CreateQueryAsync(sentence, cancellationToken);
     }
@@ -39,7 +39,7 @@ public class FakeKnowledgeBase : IKnowledgeBase
     /// <param name="query">The query sentence.</param>
     /// <param name="cancellationToken">A cancellation token for the operation.</param>
     /// <returns>A task that returns an <see cref="FakeQuery"/> instance that can be used to execute the query.</returns>
-    public Task<FakeQuery> CreateQueryAsync(Sentence query, CancellationToken cancellationToken = default)
+    public Task<FakeQuery> CreateQueryAsync(Formula query, CancellationToken cancellationToken = default)
     {
         return Task.FromResult(new FakeQuery(query, clauseStore));
     }
@@ -49,7 +49,7 @@ public class FakeKnowledgeBase : IKnowledgeBase
     /// </summary>
     /// <param name="query">The query sentence.</param>
     /// <returns>A <see cref="FakeQuery"/> instance that can be used to execute the query.</returns>
-    public FakeQuery CreateQuery(Sentence query)
+    public FakeQuery CreateQuery(Formula query)
     {
         return CreateQueryAsync(query).GetAwaiter().GetResult();
     }

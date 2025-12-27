@@ -1,6 +1,6 @@
 ﻿// Copyright (c) 2021-2025 Simon Condon.
 // You may use this file in accordance with the terms of the MIT license.
-using SCFirstOrderLogic.SentenceManipulation.Normalisation;
+using SCFirstOrderLogic.FormulaManipulation.Normalisation;
 using System;
 using System.Linq;
 using System.Threading;
@@ -22,7 +22,7 @@ public class ForwardChainingKnowledgeBase : IKnowledgeBase
     public ForwardChainingKnowledgeBase(IKnowledgeBaseClauseStore clauseStore) => this.clauseStore = clauseStore;
 
     /// <inheritdoc />
-    public async Task TellAsync(Sentence sentence, CancellationToken cancellationToken = default)
+    public async Task TellAsync(Formula sentence, CancellationToken cancellationToken = default)
     {
         // Normalize, then verify that the sentence consists only of definite clauses
         // before indexing ANY of them:
@@ -45,7 +45,7 @@ public class ForwardChainingKnowledgeBase : IKnowledgeBase
     }
 
     /// <inheritdoc />
-    async Task<IQuery> IKnowledgeBase.CreateQueryAsync(Sentence sentence, CancellationToken cancellationToken)
+    async Task<IQuery> IKnowledgeBase.CreateQueryAsync(Formula sentence, CancellationToken cancellationToken)
     {
         return await CreateQueryAsync(sentence, cancellationToken);
     }
@@ -56,7 +56,7 @@ public class ForwardChainingKnowledgeBase : IKnowledgeBase
     /// <param name="query">The query sentence.</param>
     /// <param name="cancellationToken">A cancellation token for the operation.</param>
     /// <returns>A task that returns an <see cref="ForwardChainingQuery"/> instance that can be used to execute the query and examine the details of the result.</returns>
-    public async Task<ForwardChainingQuery> CreateQueryAsync(Sentence query, CancellationToken cancellationToken = default)
+    public async Task<ForwardChainingQuery> CreateQueryAsync(Formula query, CancellationToken cancellationToken = default)
     {
         if (query is not Predicate p)
         {
@@ -75,7 +75,7 @@ public class ForwardChainingKnowledgeBase : IKnowledgeBase
     /// </summary>
     /// <param name="query">The query sentence.</param>
     /// <returns>An <see cref="ForwardChainingQuery"/> instance that can be used to execute the query and examine the details of the result.</returns>
-    public ForwardChainingQuery CreateQuery(Sentence query)
+    public ForwardChainingQuery CreateQuery(Formula query)
     {
         return CreateQueryAsync(query).GetAwaiter().GetResult();
     }

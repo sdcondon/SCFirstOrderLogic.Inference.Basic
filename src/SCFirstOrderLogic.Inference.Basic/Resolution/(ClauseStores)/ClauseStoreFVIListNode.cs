@@ -2,6 +2,7 @@
 // You may use this file in accordance with the terms of the MIT license.
 using SCFirstOrderLogic.ClauseIndexing;
 using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace SCFirstOrderLogic.Inference.Basic.Resolution;
@@ -41,28 +42,28 @@ public class ClauseStoreFVIListNode<TFeature> : IClauseStoreFVINode<TFeature>
         innerNode.KeyValuePairs;
 
     /// <inheritdoc/>
-    public ValueTask AddValueAsync(CNFClause clause, CNFClause value) =>
-        innerNode.AddValueAsync(clause, value);
+    public ValueTask AddValueAsync(CNFClause clause, CNFClause value, CancellationToken cancellationToken = default) =>
+        innerNode.AddValueAsync(clause, value, cancellationToken);
 
     /// <inheritdoc/>
-    public ValueTask<IAsyncFeatureVectorIndexNode<TFeature, CNFClause>> GetOrAddChildAsync(FeatureVectorComponent<TFeature> vectorComponent) =>
-        innerNode.GetOrAddChildAsync(vectorComponent);
+    public ValueTask<IAsyncFeatureVectorIndexNode<TFeature, CNFClause>> GetOrAddChildAsync(FeatureVectorComponent<TFeature> vectorComponent, CancellationToken cancellationToken = default) =>
+        innerNode.GetOrAddChildAsync(vectorComponent, cancellationToken);
 
     /// <inheritdoc/>
-    public ValueTask<bool> RemoveValueAsync(CNFClause clause) =>
-        innerNode.RemoveValueAsync(clause);
+    public ValueTask<bool> RemoveValueAsync(CNFClause clause, CancellationToken cancellationToken = default) =>
+        innerNode.RemoveValueAsync(clause, cancellationToken);
 
     /// <inheritdoc/>
-    public ValueTask<IAsyncFeatureVectorIndexNode<TFeature, CNFClause>?> TryGetChildAsync(FeatureVectorComponent<TFeature> vectorComponent) =>
-        innerNode.TryGetChildAsync(vectorComponent);
+    public ValueTask<IAsyncFeatureVectorIndexNode<TFeature, CNFClause>?> TryGetChildAsync(FeatureVectorComponent<TFeature> vectorComponent, CancellationToken cancellationToken = default) =>
+        innerNode.TryGetChildAsync(vectorComponent, cancellationToken);
 
     /// <inheritdoc/>
-    public ValueTask<(bool isSucceeded, CNFClause? value)> TryGetValueAsync(CNFClause clause) =>
-        innerNode.TryGetValueAsync(clause);
+    public ValueTask<(bool isSucceeded, CNFClause? value)> TryGetValueAsync(CNFClause clause, CancellationToken cancellationToken = default) =>
+        innerNode.TryGetValueAsync(clause, cancellationToken);
 
     /// <inheritdoc/>
-    public ValueTask DeleteChildAsync(FeatureVectorComponent<TFeature> vectorComponent) =>
-        innerNode.DeleteChildAsync(vectorComponent);
+    public ValueTask DeleteChildAsync(FeatureVectorComponent<TFeature> vectorComponent, CancellationToken cancellationToken = default) =>
+        innerNode.DeleteChildAsync(vectorComponent, cancellationToken);
 
     /// <inheritdoc/>
     public Task<IClauseStoreFVINode<TFeature>> CopyAsync()

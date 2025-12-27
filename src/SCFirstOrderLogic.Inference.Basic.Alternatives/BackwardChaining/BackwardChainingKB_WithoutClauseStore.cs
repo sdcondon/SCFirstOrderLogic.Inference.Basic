@@ -1,8 +1,8 @@
 ﻿// Copyright (c) 2021-2025 Simon Condon.
 // You may use this file in accordance with the terms of the MIT license.
-using SCFirstOrderLogic.SentenceFormatting;
-using SCFirstOrderLogic.SentenceManipulation.Normalisation;
-using SCFirstOrderLogic.SentenceManipulation.VariableManipulation;
+using SCFirstOrderLogic.FormulaFormatting;
+using SCFirstOrderLogic.FormulaManipulation.Normalisation;
+using SCFirstOrderLogic.FormulaManipulation.Substitution;
 using System.Text;
 
 namespace SCFirstOrderLogic.Inference.Basic.BackwardChaining;
@@ -15,13 +15,13 @@ namespace SCFirstOrderLogic.Inference.Basic.BackwardChaining;
 /// Differs from real version in that it doesn't use a clause store.
 /// </para>
 /// </summary>
-public class BackwardChainingKB_WithoutClauseStore : IKnowledgeBase
+public sealed class BackwardChainingKB_WithoutClauseStore : IKnowledgeBase
 {
     // NB: Hard-coding of clause storage in a Dictionary instead of an anstracted clause store:
     private readonly Dictionary<object, List<CNFDefiniteClause>> clausesByConsequentPredicateId = new();
 
     /// <inheritdoc />
-    public Task TellAsync(Sentence sentence, CancellationToken cancellationToken = default)
+    public Task TellAsync(Formula sentence, CancellationToken cancellationToken = default)
     {
         // Normalize, then verify that the sentence consists only of definite clauses
         // before indexing any of them:
@@ -49,7 +49,7 @@ public class BackwardChainingKB_WithoutClauseStore : IKnowledgeBase
     }
 
     /// <inheritdoc />
-    async Task<IQuery> IKnowledgeBase.CreateQueryAsync(Sentence sentence, CancellationToken cancellationToken)
+    async Task<IQuery> IKnowledgeBase.CreateQueryAsync(Formula sentence, CancellationToken cancellationToken)
     {
         return await CreateQueryAsync(sentence, cancellationToken);
     }
@@ -60,7 +60,7 @@ public class BackwardChainingKB_WithoutClauseStore : IKnowledgeBase
     /// <param name="query">The query sentence.</param>
     /// <param name="cancellationToken">A cancellation token for the operation.</param>
     /// <returns>A task that returns an <see cref="BackwardChainingQuery"/> instance that can be used to execute the query and examine the details of the result.</returns>
-    public Task<Query> CreateQueryAsync(Sentence query, CancellationToken cancellationToken = default)
+    public Task<Query> CreateQueryAsync(Formula query, CancellationToken cancellationToken = default)
     {
         if (query is not Predicate p)
         {
@@ -81,7 +81,7 @@ public class BackwardChainingKB_WithoutClauseStore : IKnowledgeBase
     /// </summary>
     /// <param name="query">The query sentence.</param>
     /// <returns>An <see cref="BackwardChainingQuery"/> instance that can be used to execute the query and examine the details of the result.</returns>
-    public Query CreateQuery(Sentence query)
+    public Query CreateQuery(Formula query)
     {
         return CreateQueryAsync(query).GetAwaiter().GetResult();
     }
@@ -120,7 +120,7 @@ public class BackwardChainingKB_WithoutClauseStore : IKnowledgeBase
             get
             {
                 // Don't bother lazy.. Won't be critical path - not worth the complexity hit. Might revisit.
-                var formatter = new SentenceFormatter();
+                var formatter = new FormulaFormatter();
                 var cnfExplainer = new CNFExplainer(formatter);
                 var resultExplanation = new StringBuilder();
 
