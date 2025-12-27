@@ -75,8 +75,8 @@ public class ResolutionKBBenchmarks_Curiousity
 
     private static IKnowledgeBaseClauseStore MakeFVIClauseStore()
     {
-        return new FeatureVectorIndexClauseStore<MaxDepthFeature>(
+        return new FeatureVectorIndexClauseStore(
             MaxDepthFeature.MakeFeatureVector,
-            new ClauseStoreFVIListNode<MaxDepthFeature>(MaxDepthFeature.MakeFeatureComparer()));
+            new ClauseStoreFVIListNode(MaxDepthFeature.MakeFeatureComparer()));
     }
 }

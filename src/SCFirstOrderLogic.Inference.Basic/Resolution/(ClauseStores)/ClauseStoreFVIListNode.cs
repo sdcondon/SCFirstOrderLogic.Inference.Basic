@@ -1,6 +1,7 @@
 ﻿// Copyright (c) 2021-2025 Simon Condon.
 // You may use this file in accordance with the terms of the MIT license.
 using SCFirstOrderLogic.ClauseIndexing;
+using System.Collections;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
@@ -8,33 +9,31 @@ using System.Threading.Tasks;
 namespace SCFirstOrderLogic.Inference.Basic.Resolution;
 
 /// <summary>
-/// Implementation of <see cref="IClauseStoreFVINode{TFeature}"/> that just wraps a <see cref="AsyncFeatureVectorIndexListNode{TFeature, TValue}"/>.
+/// Implementation of <see cref="IClauseStoreFVINode"/> that just wraps a <see cref="AsyncFeatureVectorIndexListNode{TValue}"/>.
 /// </summary>
-/// <typeparam name="TFeature">The type of the keys of the feature vectors.</typeparam>
-public class ClauseStoreFVIListNode<TFeature> : IClauseStoreFVINode<TFeature>
-    where TFeature : notnull
+public class ClauseStoreFVIListNode : IClauseStoreFVINode
 {
-    private readonly AsyncFeatureVectorIndexListNode<TFeature, CNFClause> innerNode;
+    private readonly AsyncFeatureVectorIndexListNode<CNFClause> innerNode;
 
     /// <summary>
-    /// Initialises a new instance of the <see cref="ClauseStoreFVIListNode{TFeature}"/> class.
+    /// Initialises a new instance of the <see cref="ClauseStoreFVIListNode"/> class.
     /// </summary>
     /// <param name="featureComparer"></param>
-    public ClauseStoreFVIListNode(IComparer<TFeature> featureComparer)
+    public ClauseStoreFVIListNode(IComparer featureComparer)
     {
         innerNode = new(featureComparer);
     }
 
     /// <inheritdoc/>
-    public IComparer<TFeature> FeatureComparer =>
+    public IComparer FeatureComparer =>
         innerNode.FeatureComparer;
 
     /// <inheritdoc/>
-    public IAsyncEnumerable<KeyValuePair<FeatureVectorComponent<TFeature>, IAsyncFeatureVectorIndexNode<TFeature, CNFClause>>> ChildrenAscending =>
+    public IAsyncEnumerable<KeyValuePair<FeatureVectorComponent, IAsyncFeatureVectorIndexNode<CNFClause>>> ChildrenAscending =>
         innerNode.ChildrenAscending;
 
     /// <inheritdoc/>
-    public IAsyncEnumerable<KeyValuePair<FeatureVectorComponent<TFeature>, IAsyncFeatureVectorIndexNode<TFeature, CNFClause>>> ChildrenDescending =>
+    public IAsyncEnumerable<KeyValuePair<FeatureVectorComponent, IAsyncFeatureVectorIndexNode<CNFClause>>> ChildrenDescending =>
         innerNode.ChildrenDescending;
 
     /// <inheritdoc/>
@@ -46,7 +45,7 @@ public class ClauseStoreFVIListNode<TFeature> : IClauseStoreFVINode<TFeature>
         innerNode.AddValueAsync(clause, value, cancellationToken);
 
     /// <inheritdoc/>
-    public ValueTask<IAsyncFeatureVectorIndexNode<TFeature, CNFClause>> GetOrAddChildAsync(FeatureVectorComponent<TFeature> vectorComponent, CancellationToken cancellationToken = default) =>
+    public ValueTask<IAsyncFeatureVectorIndexNode<CNFClause>> GetOrAddChildAsync(FeatureVectorComponent vectorComponent, CancellationToken cancellationToken = default) =>
         innerNode.GetOrAddChildAsync(vectorComponent, cancellationToken);
 
     /// <inheritdoc/>
@@ -54,7 +53,7 @@ public class ClauseStoreFVIListNode<TFeature> : IClauseStoreFVINode<TFeature>
         innerNode.RemoveValueAsync(clause, cancellationToken);
 
     /// <inheritdoc/>
-    public ValueTask<IAsyncFeatureVectorIndexNode<TFeature, CNFClause>?> TryGetChildAsync(FeatureVectorComponent<TFeature> vectorComponent, CancellationToken cancellationToken = default) =>
+    public ValueTask<IAsyncFeatureVectorIndexNode<CNFClause>?> TryGetChildAsync(FeatureVectorComponent vectorComponent, CancellationToken cancellationToken = default) =>
         innerNode.TryGetChildAsync(vectorComponent, cancellationToken);
 
     /// <inheritdoc/>
@@ -62,19 +61,19 @@ public class ClauseStoreFVIListNode<TFeature> : IClauseStoreFVINode<TFeature>
         innerNode.TryGetValueAsync(clause, cancellationToken);
 
     /// <inheritdoc/>
-    public ValueTask DeleteChildAsync(FeatureVectorComponent<TFeature> vectorComponent, CancellationToken cancellationToken = default) =>
+    public ValueTask DeleteChildAsync(FeatureVectorComponent vectorComponent, CancellationToken cancellationToken = default) =>
         innerNode.DeleteChildAsync(vectorComponent, cancellationToken);
 
     /// <inheritdoc/>
-    public Task<IClauseStoreFVINode<TFeature>> CopyAsync()
+    public Task<IClauseStoreFVINode> CopyAsync()
     {
-        var thisCopy = new ClauseStoreFVIListNode<TFeature>(innerNode.FeatureComparer);
+        var thisCopy = new ClauseStoreFVIListNode(innerNode.FeatureComparer);
         CopyValuesAndChildrenAsync(innerNode, thisCopy.innerNode).GetAwaiter().GetResult();
-        return Task.FromResult<IClauseStoreFVINode<TFeature>>(thisCopy);
+        return Task.FromResult<IClauseStoreFVINode>(thisCopy);
 
         static async Task CopyValuesAndChildrenAsync(
-            AsyncFeatureVectorIndexListNode<TFeature, CNFClause> original,
-            AsyncFeatureVectorIndexListNode<TFeature, CNFClause> copy)
+            AsyncFeatureVectorIndexListNode<CNFClause> original,
+            AsyncFeatureVectorIndexListNode<CNFClause> copy)
         {
             await foreach (var (key, value) in original.KeyValuePairs)
             {
@@ -86,8 +85,8 @@ public class ClauseStoreFVIListNode<TFeature> : IClauseStoreFVINode<TFeature>
                 var childCopy = await copy.GetOrAddChildAsync(featureVectorComponent);
 
                 await CopyValuesAndChildrenAsync(
-                    (AsyncFeatureVectorIndexListNode<TFeature, CNFClause>)child,
-                    (AsyncFeatureVectorIndexListNode<TFeature, CNFClause>)childCopy);
+                    (AsyncFeatureVectorIndexListNode<CNFClause>)child,
+                    (AsyncFeatureVectorIndexListNode<CNFClause>)childCopy);
             }
         }
     }

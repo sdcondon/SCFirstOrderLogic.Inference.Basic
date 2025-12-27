@@ -82,8 +82,8 @@ public class ResolutionKBBenchmarks_Crime
 
     private static IKnowledgeBaseClauseStore MakeFVIClauseStore()
     {
-        return new FeatureVectorIndexClauseStore<MaxDepthFeature>(
+        return new FeatureVectorIndexClauseStore(
             MaxDepthFeature.MakeFeatureVector,
-            new ClauseStoreFVIListNode<MaxDepthFeature>(MaxDepthFeature.MakeFeatureComparer()));
+            new ClauseStoreFVIListNode(MaxDepthFeature.MakeFeatureComparer()));
     }
 }

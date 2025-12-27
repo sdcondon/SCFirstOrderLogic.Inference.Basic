@@ -138,7 +138,7 @@ public class BackwardChainingKB_FromAIaMA : IKnowledgeBase
                 {
                     var restandardisedClause = clause.Restandardise();
 
-                    var lhs = restandardisedClause.Literals.Where(l => l.IsNegated).Select(l => l.Predicate);
+                    var lhs = restandardisedClause.Literals.Where(l => l.IsNegative).Select(l => l.Predicate);
                     var rhs = restandardisedClause.Literals.Single(l => l.IsPositive);
 
                     if (Unifier.TryUpdate(rhs, (Literal)goal, θ, out var unifier))

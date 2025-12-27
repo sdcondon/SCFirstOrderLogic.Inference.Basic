@@ -209,9 +209,9 @@ public static class ResolutionKnowledgeBaseTests
 
     private static ResolutionKnowledgeBase UnitPrefWithFVIClauseStore()
     {
-        var clauseStore = new FeatureVectorIndexClauseStore<MaxDepthFeature>(
+        var clauseStore = new FeatureVectorIndexClauseStore(
             MaxDepthFeature.MakeFeatureVector,
-            new ClauseStoreFVIListNode<MaxDepthFeature>(MaxDepthFeature.MakeFeatureComparer()));
+            new ClauseStoreFVIListNode(MaxDepthFeature.MakeFeatureComparer()));
 
         return new ResolutionKnowledgeBase(new DelegateResolutionStrategy(
             clauseStore,
@@ -228,9 +228,9 @@ public static class ResolutionKnowledgeBaseTests
 
     private static ResolutionKnowledgeBase LinearWithFVIClauseStore()
     {
-        var clauseStore = new FeatureVectorIndexClauseStore<MaxDepthFeature>(
+        var clauseStore = new FeatureVectorIndexClauseStore(
             MaxDepthFeature.MakeFeatureVector,
-            new ClauseStoreFVIListNode<MaxDepthFeature>(MaxDepthFeature.MakeFeatureComparer()));
+            new ClauseStoreFVIListNode(MaxDepthFeature.MakeFeatureComparer()));
 
         return new ResolutionKnowledgeBase(new LinearResolutionStrategy(
             clauseStore,
@@ -239,9 +239,9 @@ public static class ResolutionKnowledgeBaseTests
 
     private static ResolutionKnowledgeBase LinearWithoutIntClauseStorage()
     {
-        var clauseStore = new FeatureVectorIndexClauseStore<MaxDepthFeature>(
+        var clauseStore = new FeatureVectorIndexClauseStore(
             MaxDepthFeature.MakeFeatureVector,
-            new ClauseStoreFVIListNode<MaxDepthFeature>(MaxDepthFeature.MakeFeatureComparer()));
+            new ClauseStoreFVIListNode(MaxDepthFeature.MakeFeatureComparer()));
 
         return new ResolutionKnowledgeBase(new LinearResolutionStrategy_WithoutIntermediateClauseStorage(
             clauseStore,

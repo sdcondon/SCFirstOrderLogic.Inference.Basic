@@ -12,28 +12,27 @@ namespace SCFirstOrderLogic.Inference.Basic.Resolution;
 
 /// <summary>
 /// An implementation of <see cref="IKnowledgeBaseClauseStore"/> that maintains all known clauses in
-/// a <see cref="AsyncFeatureVectorIndex{TFeature}"/>.
+/// a <see cref="AsyncFeatureVectorIndex"/>.
 /// </summary>
-public class FeatureVectorIndexClauseStore<TFeature> : IKnowledgeBaseClauseStore
-    where TFeature : notnull
+public class FeatureVectorIndexClauseStore : IKnowledgeBaseClauseStore
 {
-    private readonly Func<CNFClause, IEnumerable<FeatureVectorComponent<TFeature>>> featureVectorMaker;
-    private readonly IClauseStoreFVINode<TFeature> featureVectorIndexRoot;
-    private readonly AsyncFeatureVectorIndex<TFeature> featureVectorIndex;
+    private readonly Func<CNFClause, IEnumerable<FeatureVectorComponent>> featureVectorMaker;
+    private readonly IClauseStoreFVINode featureVectorIndexRoot;
+    private readonly AsyncFeatureVectorIndex featureVectorIndex;
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="FeatureVectorIndexClauseStore{TFeature}"/> class.
+    /// Initializes a new instance of the <see cref="FeatureVectorIndexClauseStore"/> class.
     /// </summary>
     /// <param name="featureVectorMaker">Delegate that makes the feature vector for a given clause.</param>
     /// <param name="featureVectorIndexRoot">The root node to use for the feature vector index.</param>
     public FeatureVectorIndexClauseStore(
-        Func<CNFClause, IEnumerable<FeatureVectorComponent<TFeature>>> featureVectorMaker,
-        IClauseStoreFVINode<TFeature> featureVectorIndexRoot)
+        Func<CNFClause, IEnumerable<FeatureVectorComponent>> featureVectorMaker,
+        IClauseStoreFVINode featureVectorIndexRoot)
     {
         this.featureVectorMaker = featureVectorMaker;
         this.featureVectorIndexRoot = featureVectorIndexRoot;
 
-        featureVectorIndex = new AsyncFeatureVectorIndex<TFeature>(
+        featureVectorIndex = new AsyncFeatureVectorIndex(
             featureVectorMaker,
             featureVectorIndexRoot);
     }
@@ -63,16 +62,16 @@ public class FeatureVectorIndexClauseStore<TFeature> : IKnowledgeBaseClauseStore
     /// </summary>
     private class QueryStore : IQueryClauseStore
     {
-        private readonly IClauseStoreFVINode<TFeature> featureVectorIndexRoot;
-        private readonly AsyncFeatureVectorIndex<TFeature> featureVectorIndex;
+        private readonly IClauseStoreFVINode featureVectorIndexRoot;
+        private readonly AsyncFeatureVectorIndex featureVectorIndex;
 
         public QueryStore(
-            Func<CNFClause, IEnumerable<FeatureVectorComponent<TFeature>>> featureVectorSelector,
-            IClauseStoreFVINode<TFeature> featureVectorIndexRoot)
+            Func<CNFClause, IEnumerable<FeatureVectorComponent>> featureVectorSelector,
+            IClauseStoreFVINode featureVectorIndexRoot)
         {
             this.featureVectorIndexRoot = featureVectorIndexRoot;
 
-            featureVectorIndex = new AsyncFeatureVectorIndex<TFeature>(
+            featureVectorIndex = new AsyncFeatureVectorIndex(
                 featureVectorSelector,
                 featureVectorIndexRoot);
         }
